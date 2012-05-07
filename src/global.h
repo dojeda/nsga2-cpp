@@ -24,8 +24,8 @@ typedef struct
     double *constr;
     double crowd_dist;
 }
-individual;
-
+individual; // DONE
+     
 typedef struct
 {
     individual *ind;
@@ -70,9 +70,9 @@ extern int angle1;
 extern int angle2;
 
 void allocate_memory_pop (population *pop, int size);
-void allocate_memory_ind (individual *ind);
+     void allocate_memory_ind (individual *ind); // DONE
 void deallocate_memory_pop (population *pop, int size);
-void deallocate_memory_ind (individual *ind);
+     void deallocate_memory_ind (individual *ind); // DONE: not needed
 
 double maximum (double a, double b);
 double minimum (double a, double b);

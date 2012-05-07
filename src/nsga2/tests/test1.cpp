@@ -10,6 +10,10 @@ int main(int argc, char *argv[]) {
     nsga2::individual ind(3,3,2,nbits,2);
 
     cout << "Individual: " << ind << endl;
+
+    nsga2::population pop(5,3,3,2,nbits,2);
+
+    cout << "Population: " << pop << endl;
     
     return 0;
 }

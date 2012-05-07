@@ -20,7 +20,7 @@ void allocate_memory_pop (population *pop, int size)
 }
 
 /* Function to allocate memory to an individual */
-void allocate_memory_ind (individual *ind)
+void allocate_memory_ind (individual *ind) // translated
 {
     int j;
     if (nreal != 0)
@@ -57,7 +57,7 @@ void deallocate_memory_pop (population *pop, int size)
 }
 
 /* Function to deallocate memory to an individual */
-void deallocate_memory_ind (individual *ind)
+void deallocate_memory_ind (individual *ind) // not need to translate
 {
     int j;
     if (nreal != 0)

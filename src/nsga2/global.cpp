@@ -2,11 +2,21 @@
 
 using namespace nsga2;
 
+individual::individual() throw () :
+    rank(0),
+    constr_violation(0),
+    xreal(0),
+    gene(0),
+    xbin(0),
+    obj(0),
+    constr(0),
+    crowd_dist(0) {}
+
 individual::individual(const unsigned int nreal,
                        const unsigned int nbin,
                        const unsigned int ncon,
                        const std::vector<int>& nbits,
-                       const unsigned int nobj) :
+                       const unsigned int nobj) throw (nsga2::nsga2exception) :
     rank(0),
     constr_violation(0) {
     
@@ -80,5 +90,32 @@ std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
  
     os << " }";
     
+    return os;
+}
+
+population::population(const unsigned int size,
+                       const unsigned int nreal,
+                       const unsigned int nbin,
+                       const unsigned int ncon,
+                       const std::vector<int>& nbits,
+                       const unsigned int nobj) throw (nsga2::nsga2exception) :
+    ind(0) {
+    
+    for (unsigned int i = 0; i < size; ++i) {
+        ind.push_back(individual(nreal,nbin,ncon,nbits,nobj));
+    }
+    
+}
+
+population::~population() {
+}
+
+std::ostream& nsga2::operator<< (std::ostream& os, const population& pop) {
+    os << "Population: {\n";
+    std::vector<individual>::const_iterator it;
+    for (it = pop.ind.begin(); it != pop.ind.end(); ++it) {
+        os << *it;
+    }
+    os << '}';
     return os;
 }
