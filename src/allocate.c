@@ -8,7 +8,7 @@
 # include "rand.h"
 
 /* Function to allocate memory to a population */
-void allocate_memory_pop (population *pop, int size)
+void allocate_memory_pop (population *pop, int size) // translated
 {
     int i;
     pop->ind = (individual *)malloc(size*sizeof(individual));
@@ -45,7 +45,7 @@ void allocate_memory_ind (individual *ind) // translated
 }
 
 /* Function to deallocate memory to a population */
-void deallocate_memory_pop (population *pop, int size)
+void deallocate_memory_pop (population *pop, int size) // no need to translate
 {
     int i;
     for (i=0; i<size; i++)
@@ -57,7 +57,7 @@ void deallocate_memory_pop (population *pop, int size)
 }
 
 /* Function to deallocate memory to an individual */
-void deallocate_memory_ind (individual *ind) // not need to translate
+void deallocate_memory_ind (individual *ind) // no need to translate
 {
     int j;
     if (nreal != 0)

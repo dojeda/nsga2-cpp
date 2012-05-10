@@ -38,6 +38,9 @@ namespace nsga2 {
     std::ostream& operator<< (std::ostream& os, const individual& ind);
 
     struct population {
+
+        typedef population* ptr;
+        
         population(const unsigned int size,
                    const unsigned int nreal,
                    const unsigned int nbin,

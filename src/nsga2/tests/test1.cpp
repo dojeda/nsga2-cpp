@@ -1,4 +1,6 @@
 #include <nsga2/global.h>
+#include <nsga2/NSGA2.h>
+
 #include <vector>
 #include <iostream>
 
@@ -14,6 +16,10 @@ int main(int argc, char *argv[]) {
     nsga2::population pop(5,3,3,2,nbits,2);
 
     cout << "Population: " << pop << endl;
+
+    nsga2::NSGA2 ga;
+
+    cout << "GA: " << &ga << endl;
     
     return 0;
 }

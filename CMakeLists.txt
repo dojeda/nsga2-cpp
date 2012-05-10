@@ -8,7 +8,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -pedantic -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
 
 set(NSGA2_SOURCE_FILES
-  src/nsga2/global.cpp)
+  src/nsga2/global.cpp
+  src/nsga2/NSGA2.cpp)
 
 include_directories(src)
 

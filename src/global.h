@@ -30,7 +30,7 @@ typedef struct
 {
     individual *ind;
 }
-population;
+    population; // DONE
 
 typedef struct lists
 {
@@ -69,13 +69,13 @@ extern int obj3;
 extern int angle1;
 extern int angle2;
 
-void allocate_memory_pop (population *pop, int size);
+     void allocate_memory_pop (population *pop, int size); // DONE
      void allocate_memory_ind (individual *ind); // DONE
-void deallocate_memory_pop (population *pop, int size);
+     void deallocate_memory_pop (population *pop, int size); // DONE: not needed
      void deallocate_memory_ind (individual *ind); // DONE: not needed
 
-double maximum (double a, double b);
-double minimum (double a, double b);
+     double maximum (double a, double b); // not needed
+     double minimum (double a, double b); // not needed
 
 void crossover (individual *parent1, individual *parent2, individual *child1, individual *child2);
 void realcross (individual *parent1, individual *parent2, individual *child1, individual *child2);

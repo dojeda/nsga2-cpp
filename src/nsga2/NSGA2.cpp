@@ -31,8 +31,23 @@ NSGA2::NSGA2() :
     obj2(0),
     obj3(0),
     angle1(0),
-    angle2(0) {
+    angle2(0),
+    parent_pop(0),
+    child_pop(0),
+    mixed_pop(0) {
 }
 
 NSGA2::~NSGA2() {
+    if (parent_pop) {
+        delete parent_pop;
+        parent_pop = 0;
+    }
+    if (child_pop) {
+        delete child_pop;
+        child_pop = 0;
+    }
+    if (mixed_pop) {
+        delete mixed_pop;
+        mixed_pop = 0;
+    }
 }

@@ -1,6 +1,8 @@
 #ifndef NSGA2_H_
 #define NSGA2_H_
 
+#include <nsga2/global.h>
+
 #include <vector>
 #include <utility>
 
@@ -41,6 +43,21 @@ namespace nsga2 {
         int obj3;
         int angle1;
         int angle2;
+
+    private:
+        // random generator?
+        // FILE *fpt1;
+        // FILE *fpt2;
+        // FILE *fpt3;
+        // FILE *fpt4;
+        // FILE *fpt5;
+        // FILE *gp;
+        // population *parent_pop;
+        // population *child_pop;
+        // population *mixed_pop;
+        population::ptr parent_pop;
+        population::ptr child_pop;
+        population::ptr mixed_pop;
     };
     
 }
