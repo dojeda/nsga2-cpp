@@ -20,3 +20,8 @@ add_executable(test1
   src/nsga2/tests/test1.cpp)
 
 target_link_libraries(test1 nsga2)
+
+add_executable(test2
+  src/nsga2/tests/test2.cpp)
+
+target_link_libraries(test2 nsga2)

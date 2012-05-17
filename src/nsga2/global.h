@@ -4,6 +4,7 @@
 #include <vector>
 #include <ostream>
 #include <string>
+#include <utility>
 
 #include "nsga2/exception.h"
 
