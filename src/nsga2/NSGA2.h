@@ -12,7 +12,9 @@ namespace nsga2 {
     public:
         NSGA2();
         virtual ~NSGA2();
+        
     private:
+        // Parameters to be defined by the user
         int nreal;
         int nbin;
         int nobj;
@@ -36,15 +38,15 @@ namespace nsga2 {
         // double *min_binvar;
         // double *max_binvar;
         std::vector< std::pair<double,double> > limits_binvar;
-        int bitlength;
-        int choice;
-        int obj1;
-        int obj2;
-        int obj3;
-        int angle1;
-        int angle2;
+        // int choice; // to be added later, maybe.
+        // int obj1;
+        // int obj2;
+        // int obj3;
+        // int angle1;
+        // int angle2;
 
     private:
+        int bitlength;
         // random generator?
         // FILE *fpt1;
         // FILE *fpt2;
@@ -55,9 +57,9 @@ namespace nsga2 {
         // population *parent_pop;
         // population *child_pop;
         // population *mixed_pop;
-        population::ptr parent_pop;
-        population::ptr child_pop;
-        population::ptr mixed_pop;
+        population* parent_pop;
+        population* child_pop;
+        population* mixed_pop;
     };
     
 }
