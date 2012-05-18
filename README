@@ -1,0 +1,8 @@
+A C++ implementation of the NSGA-II algorithm based on the original C implementation.
+
+**Work in progress**
+
+Original code in C from:
+Kanpur Genetic Algorithms Laboratory
+
+http://www.iitk.ac.in/kangal/codes.shtml
