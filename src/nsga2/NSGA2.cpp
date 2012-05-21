@@ -1,4 +1,5 @@
 #include "nsga2/NSGA2.h"
+#include "rand.h"
 
 #include <iostream>
 
@@ -90,4 +91,42 @@ void NSGA2::initialize() throw (nsga2exception) {
     if (limits_binvar.size() != nbin)
         throw nsga2exception("Invalid number of binary variable limits");
 
+    nbinmut    = 0;
+    nrealmut   = 0;
+    nbincross  = 0;
+    nrealcross = 0;
+
+    parent_pop = new population(popsize,
+                                nreal,
+                                nbin,
+                                ncon,
+                                nbits,
+                                limits_realvar,
+                                limits_binvar,
+                                nobj);
+    child_pop  = new population(popsize,
+                                nreal,
+                                nbin,
+                                ncon,
+                                nbits,
+                                limits_realvar,
+                                limits_binvar,
+                                nobj);
+    mixed_pop  = new population(popsize*2,
+                                nreal,
+                                nbin,
+                                ncon,
+                                nbits,
+                                limits_realvar,
+                                limits_binvar,
+                                nobj);
+
+    randomize();
+    parent_pop->initialize();
+    cout << "Initialization done, now performing first generation" << endl;
+
+    parent_pop->decode();
+    // evaluate_pop (parent_pop);
+    // assign_rank_and_crowding_distance (parent_pop);
+    
 }

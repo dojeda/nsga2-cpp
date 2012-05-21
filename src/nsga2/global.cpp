@@ -1,4 +1,5 @@
 #include "nsga2/global.h"
+#include "rand.h"
 
 using namespace nsga2;
 
@@ -10,30 +11,68 @@ individual::individual() throw () :
     xbin(0),
     obj(0),
     constr(0),
-    crowd_dist(0) {}
+    crowd_dist(0),
+    config(0) {}
 
-individual::individual(const unsigned int nreal,
+individual::individual(const individual_config& c
+                       /*const unsigned int nreal,
                        const unsigned int nbin,
                        const unsigned int ncon,
                        const std::vector<int>& nbits,
-                       const unsigned int nobj) throw (nsga2::nsga2exception) :
+                       const unsigned int nobj*/) throw (nsga2::nsga2exception) :
     rank(0),
-    constr_violation(0) {
+    constr_violation(0),
+    xreal(0),
+    gene(0),
+    xbin(0),
+    obj(0),
+    constr(0),
+    crowd_dist(0),
+    config(&c) {
     
-    xreal.resize(nreal,0);
-    xbin.resize(nbin,0);
-    gene.resize(nbin);
-    if (nbits.size() != nbin)
+    xreal.resize(config->nreal,0);
+    xbin.resize(config->nbin,0);
+    gene.resize(config->nbin);
+    if (config->nbits.size() != config->nbin)
         throw nsga2::nsga2exception("nbits size != nbin");
-    for (unsigned int j = 0; j < nbin; ++j) {
-        gene[j].resize(nbits[j],0);
+    for (int j = 0; j < config->nbin; ++j) {
+        gene[j].resize(config->nbits[j],0);
     }
-    obj.resize(nobj,0);
-    constr.resize(ncon,0);
+    obj.resize(config->nobj,0);
+    constr.resize(config->ncon,0);
 }
 
 
 individual::~individual() {
+}
+
+void individual::initialize() throw (nsga2::nsga2exception) {
+    if (!config)
+        throw nsga2::nsga2exception("Individual not configured");
+    
+    for (int i = 0; i < config->nreal; ++i) {
+        xreal[i] = rndreal(config->limits_realvar[i].first,
+                           config->limits_realvar[i].second);
+    }
+
+    for (int i = 0; i < config->nbin; ++i) {
+        for (int j = 0; j < config->nbits[i]; ++j) {
+            gene[i][j] = randomperc() <= 0.5 ? 0 : 1;
+        }
+    }
+}
+
+void individual::decode() {
+    int sum;
+    for (int i = 0; i < config->nbin; ++i) {
+        sum = 0;
+        for (int j = 0; j < config->nbits[i]; ++j) {
+            sum += (1 << (config->nbits[i]-1-j));  // TODO: check
+        }
+
+        xbin[i] = config->limits_binvar[i].first +
+            (double)sum*( config->limits_binvar[i].second - config->limits_binvar[i].first) / (double)((1 << (config->nbits[i]))-1); // TODO: check
+    }
 }
 
 std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
@@ -58,8 +97,6 @@ std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
             os << "     "; // tab space
         for (it2 = tmp.begin(); it2 != tmp.end(); ++it2) {
             os << *it2;
-            if (it2+1 != tmp.end())
-                os << ',';
         }
         //       gene=
         os << '\n';
@@ -93,21 +130,48 @@ std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
     return os;
 }
 
-population::population(const unsigned int size,
-                       const unsigned int nreal,
-                       const unsigned int nbin,
-                       const unsigned int ncon,
+population::population(const int size,
+                       const int nreal,
+                       const int nbin,
+                       const int ncon,
                        const std::vector<int>& nbits,
-                       const unsigned int nobj) throw (nsga2::nsga2exception) :
-    ind(0) {
+                       const std::vector< std::pair<double,double> >& limreal,
+                       const std::vector< std::pair<double,double> >& limbin,
+                       const int nobj) throw (nsga2::nsga2exception) :
+    ind_config() {
+
+    ind_config.nreal = nreal;
+    ind_config.nbin  = nbin;
+    ind_config.ncon  = ncon;
+    ind_config.nbits = nbits;
+    ind_config.limits_realvar = limreal;
+    ind_config.limits_binvar  = limbin;
     
     for (unsigned int i = 0; i < size; ++i) {
-        ind.push_back(individual(nreal,nbin,ncon,nbits,nobj));
+        ind.push_back(individual(ind_config));
     }
     
 }
 
 population::~population() {
+}
+
+void population::initialize() throw (nsga2::nsga2exception) {
+    std::vector<individual>::iterator it;
+    for (it  = ind.begin();
+         it != ind.end();
+         ++it) {
+        it->initialize();
+    }
+}
+
+void population::decode() {
+    std::vector<individual>::iterator it;
+    for (it  = ind.begin();
+         it != ind.end();
+         ++it) {
+        it->decode();
+    }
 }
 
 std::ostream& nsga2::operator<< (std::ostream& os, const population& pop) {

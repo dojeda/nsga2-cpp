@@ -8,7 +8,7 @@
 # include "rand.h"
 
 /* Function to initialize a population randomly */
-void initialize_pop (population *pop)
+void initialize_pop (population *pop) // translated
 {
     int i;
     for (i=0; i<popsize; i++)
@@ -19,7 +19,7 @@ void initialize_pop (population *pop)
 }
 
 /* Function to initialize an individual randomly */
-void initialize_ind (individual *ind)
+void initialize_ind (individual *ind) // translated
 {
     int j, k;
     if (nreal!=0)

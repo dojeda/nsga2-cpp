@@ -98,8 +98,8 @@ void evaluate_ind (individual *ind);
 void fill_nondominated_sort (population *mixed_pop, population *new_pop);
 void crowding_fill (population *mixed_pop, population *new_pop, int count, int front_size, list *cur);
 
-void initialize_pop (population *pop);
-void initialize_ind (individual *ind);
+     void initialize_pop (population *pop); // DONE
+     void initialize_ind (individual *ind); // DONE
 
 void insert (list *node, int x);
 list* del (list *node);
