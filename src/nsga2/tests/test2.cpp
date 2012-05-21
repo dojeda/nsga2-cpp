@@ -325,6 +325,26 @@ int main(int argc, char *argv[]) {
     // fprintf(fpt2,"# of objectives = %d, # of constraints = %d, # of real_var = %d, # of bits of bin_var = %d, constr_violation, rank, crowding_distance\n",nobj,ncon,nreal,bitlength);
     // fprintf(fpt3,"# of objectives = %d, # of constraints = %d, # of real_var = %d, # of bits of bin_var = %d, constr_violation, rank, crowding_distance\n",nobj,ncon,nreal,bitlength);
     // fprintf(fpt4,"# of objectives = %d, # of constraints = %d, # of real_var = %d, # of bits of bin_var = %d, constr_violation, rank, crowding_distance\n",nobj,ncon,nreal,bitlength);
+
+    nsga2::NSGA2 nsga2;
+    
+    nsga2.set_nreal(nreal);
+    nsga2.set_nbin(nbin);
+    nsga2.set_nobj(nobj);
+    nsga2.set_ncon(ncon);
+    nsga2.set_popsize(popsize);
+    nsga2.set_ngen(ngen);
+    nsga2.set_pcross_real(pcross_real);
+    nsga2.set_pcross_bin(pcross_bin);
+    nsga2.set_pmut_real(pmut_real);
+    nsga2.set_pmut_bin(pmut_bin);
+    nsga2.set_eta_c(eta_c);
+    nsga2.set_eta_m(eta_m);
+    nsga2.set_nbits(nbits);
+    nsga2.set_limits_realvar(limits_realvar);
+    nsga2.set_limits_binvar(limits_binvar);
+
+    nsga2.initialize();
     
     return 0;
 }
