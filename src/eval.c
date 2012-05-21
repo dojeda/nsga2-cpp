@@ -8,7 +8,7 @@
 # include "rand.h"
 
 /* Routine to evaluate objective function values and constraints for a population */
-void evaluate_pop (population *pop)
+void evaluate_pop (population *pop) // translated
 {
     int i;
     for (i=0; i<popsize; i++)
@@ -19,7 +19,7 @@ void evaluate_pop (population *pop)
 }
 
 /* Routine to evaluate objective function values and constraints for an individual */
-void evaluate_ind (individual *ind)
+void evaluate_ind (individual *ind) // translated
 {
     int j;
     test_problem (ind->xreal, ind->xbin, ind->gene, ind->obj, ind->constr);

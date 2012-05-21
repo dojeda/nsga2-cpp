@@ -85,15 +85,15 @@ void assign_crowding_distance_list (population *pop, list *lst, int front_size);
 void assign_crowding_distance_indices (population *pop, int c1, int c2);
 void assign_crowding_distance (population *pop, int *dist, int **obj_array, int front_size);
 
-void decode_pop (population *pop);
-void decode_ind (individual *ind);
+     void decode_pop (population *pop); // DONE
+     void decode_ind (individual *ind); // DONE
 
 void onthefly_display (population *pop, FILE *gp, int ii);
 
 int check_dominance (individual *a, individual *b);
 
-void evaluate_pop (population *pop);
-void evaluate_ind (individual *ind);
+     void evaluate_pop (population *pop); // DONE
+     void evaluate_ind (individual *ind); // DONE
 
 void fill_nondominated_sort (population *mixed_pop, population *new_pop);
 void crowding_fill (population *mixed_pop, population *new_pop, int count, int front_size, list *cur);

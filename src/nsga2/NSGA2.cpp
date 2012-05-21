@@ -126,7 +126,8 @@ void NSGA2::initialize() throw (nsga2exception) {
     cout << "Initialization done, now performing first generation" << endl;
 
     parent_pop->decode();
-    // evaluate_pop (parent_pop);
+    parent_pop->evaluate();
+    //parent_pop->assign_rank_and_crowding_distance();
     // assign_rank_and_crowding_distance (parent_pop);
     
 }

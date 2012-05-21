@@ -39,7 +39,10 @@ struct individual {
     void initialize() throw (nsga2::nsga2exception);
 
     void decode();
+    void evaluate();
 
+    int check_dominance(const individual& b) const;
+    
     int rank;
     double constr_violation;
     std::vector<double> xreal;
@@ -72,6 +75,7 @@ struct population {
     void initialize() throw (nsga2::nsga2exception);
 
     void decode();
+    void evaluate();
         
     std::vector<individual> ind;
 

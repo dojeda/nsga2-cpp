@@ -1,6 +1,8 @@
 #include "nsga2/global.h"
 #include "rand.h"
 
+#include <cmath> // only for test problem def
+
 using namespace nsga2;
 
 individual::individual() throw () :
@@ -75,6 +77,98 @@ void individual::decode() {
     }
 }
 
+void test_problem (double *xreal,
+                   double *xbin,
+                   int **gene,
+                   double *obj,
+                   double *constr) {
+    // obj[0] = 4.0*(xreal[0]*xreal[0] + xreal[1]*xreal[1]);
+    // obj[1] = std::pow((xreal[0]-5.0),2.0) + std::pow((xreal[1]-5.0),2.0);
+    // constr[0] = 1.0 - (std::pow((xreal[0]-5.0),2.0) + xreal[1]*xreal[1])/25.0;
+    // constr[1] = (std::pow((xreal[0]-8.0),2.0) + std::pow((xreal[1]+3.0),2.0))/7.7 - 1.0;
+
+    obj[0] = pow(xreal[0],2.0);
+    obj[1] = pow((xreal[0]-2.0),2.0);
+    return;
+}
+
+void individual::evaluate() {
+
+    // workaround to respect the signature of test_problem and its (int**)
+    std::vector<int*> tmp(gene.size());
+    for (unsigned i=0; i < gene.size(); ++i) {
+        tmp[i] = &(gene[i][0]);
+    }
+    // TODO: change test_problem so one can change it to whatever
+    test_problem (&xreal[0], &xbin[0], &tmp[0], &obj[0], &constr[0]);
+    
+    if (config->ncon) {
+        for (int i = 0; i < config->ncon; ++i)
+            if (constr[i] < 0.0)
+                constr_violation += constr[i];
+    } else {
+        constr_violation = 0.0;
+    }
+}
+
+// returns:  1 if this < b (this dominates b),
+//          -1 if this > b (this is dominated by b),
+//           0 if they are nondominated
+int individual::check_dominance(const individual& b) const {
+    
+    if (constr_violation < 0 && b.constr_violation < 0) {
+        // both have constraint violations
+        
+        if (constr_violation > b.constr_violation)
+            return 1; // this violates less
+        else if (constr_violation < b.constr_violation)
+            return -1; // b violates less
+        else
+            return 0; // they both violate equally
+        
+    } else if (constr_violation < 0 && b.constr_violation == 0) {
+        // this violates and b doesn't => b dominates
+        
+        return -1; 
+        
+    } else if (constr_violation == 0 && b.constr_violation < 0) {
+        // this doesn't violate and b does => this dominates
+        
+        return 1; 
+        
+    } else {
+        // no constraint violations
+       
+        int flag1 = 0, // to check if this has a smaller objective
+            flag2 = 0; // to check if b    has a smaller objective
+        
+        for (int i=0; i<config->nobj; ++i) {
+            if (obj[i] < b.obj[i]) {
+                flag1 = 1;
+            } else if (obj[i] > b.obj[i]) {
+                flag2 = 1;
+            }
+        }
+        
+        if (flag1==1 && flag2==0) {
+            // there is at least one smaller objective for this and none for b
+            
+            return 1;
+            
+        } else if (flag1==0 && flag2==1) {
+            // there is at least one smaller objective for b and none for this
+            
+            return -1;
+            
+        } else {
+            // no smaller objective or both have one smaller
+            
+            return 0;
+        }
+               
+    }
+}
+
 std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
     
     os << "{Individual rank=" << ind.rank
@@ -142,6 +236,7 @@ population::population(const int size,
 
     ind_config.nreal = nreal;
     ind_config.nbin  = nbin;
+    ind_config.nobj  = nobj;
     ind_config.ncon  = ncon;
     ind_config.nbits = nbits;
     ind_config.limits_realvar = limreal;
@@ -171,6 +266,15 @@ void population::decode() {
          it != ind.end();
          ++it) {
         it->decode();
+    }
+}
+
+void population::evaluate() {
+    std::vector<individual>::iterator it;
+    for (it  = ind.begin();
+         it != ind.end();
+         ++it) {
+        it->evaluate();
     }
 }
 
