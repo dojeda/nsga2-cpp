@@ -52,6 +52,9 @@ struct individual {
     std::vector<double> constr;
     double crowd_dist;
 
+    int dcounter; // domination counter n_p
+    std::vector<int> dominated;
+
 private:
     const individual_config* config;
     friend std::ostream& operator<< (std::ostream& os, const individual& ind);
@@ -76,6 +79,7 @@ struct population {
 
     void decode();
     void evaluate();
+    void fast_nds();
 
     void report(std::ostream& os) const;
         

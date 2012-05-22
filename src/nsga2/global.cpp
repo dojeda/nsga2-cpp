@@ -2,8 +2,10 @@
 #include "rand.h"
 
 #include <cmath> // only for test problem def
+#include <iostream>
 
 using namespace nsga2;
+using namespace std;
 
 individual::individual() throw () :
     rank(0),
@@ -276,6 +278,63 @@ void population::evaluate() {
          ++it) {
         it->evaluate();
     }
+}
+
+void population::fast_nds() { // TODO: should return F?
+    std::vector< std::vector<int> >  F(1);
+    int i,j;
+    for (i = 0; i < ind.size(); ++i) {
+        
+        individual& p = ind[i];
+        p.dcounter  = 0;
+        p.dominated.clear();
+
+        for (j = 0; j < ind.size(); ++j) {
+
+            individual& q = ind[j];
+            
+            int compare = p.check_dominance(q);
+            if (compare == 1) { // p dominates q
+                p.dominated.push_back(j);
+            } else if (compare == -1) { // q dominates p
+                p.dcounter += 1;
+            }
+        }
+
+        if (p.dcounter == 0) {
+            p.rank = 1;
+            F[0].push_back(i);
+        }
+        
+    }
+
+    int fi = 1;
+    while (F[fi-1].size() > 0) {
+
+        std::vector<int>& Fi = F[fi-1];
+        std::vector<int> Q;
+        for (i = 0; i < Fi.size(); ++i) {
+            
+            individual& p = ind[Fi[i]];
+            
+            for (j = 0; j < p.dominated.size() ; ++j) {
+
+                
+                individual& q = ind[p.dominated[j]];
+                q.dcounter -= 1;
+
+                if (q.dcounter == 0) {
+                    q.rank = fi+1;
+                    Q.push_back(p.dominated[j]);
+                }
+            }
+        }
+        
+
+        fi += 1;
+        F.push_back(Q);
+    }
+    
 }
 
 void population::report(std::ostream& os) const {

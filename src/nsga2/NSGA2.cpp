@@ -134,6 +134,7 @@ void NSGA2::initialize() throw (nsga2exception) {
 
     parent_pop->decode();
     parent_pop->evaluate();
+    parent_pop->fast_nds();
     //parent_pop->assign_rank_and_crowding_distance();
     // assign_rank_and_crowding_distance (parent_pop);
 
