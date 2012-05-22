@@ -76,6 +76,8 @@ struct population {
 
     void decode();
     void evaluate();
+
+    void report(std::ostream& os) const;
         
     std::vector<individual> ind;
 

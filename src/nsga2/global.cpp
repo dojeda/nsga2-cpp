@@ -278,6 +278,30 @@ void population::evaluate() {
     }
 }
 
+void population::report(std::ostream& os) const {
+
+    std::vector<individual>::const_iterator it;
+    for (it  = ind.begin();
+         it != ind.end();
+         ++it) {
+
+        for (int j = 0; j < ind_config.nobj; ++j)
+            os << it->obj[j] << '\t';
+        for (int j = 0; j < ind_config.ncon; ++j)
+            os << it->constr[j] << '\t';
+        for (int j = 0; j < ind_config.nreal; ++j) 
+            os << it->xreal[j] << '\t';
+        for (int j = 0; j < ind_config.nbin; ++j)
+            for (int k = 0; k < ind_config.nbits[j]; ++k) 
+                os << it->gene[j][k] << '\t';
+
+        os << it->constr_violation << '\t'
+           << it->rank << '\t'
+           << it->crowd_dist << '\n';
+        
+    }
+}
+
 std::ostream& nsga2::operator<< (std::ostream& os, const population& pop) {
     os << "Population: {\n";
     std::vector<individual>::const_iterator it;

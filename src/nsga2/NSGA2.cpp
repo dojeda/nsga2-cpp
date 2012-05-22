@@ -136,6 +136,8 @@ void NSGA2::initialize() throw (nsga2exception) {
     parent_pop->evaluate();
     //parent_pop->assign_rank_and_crowding_distance();
     // assign_rank_and_crowding_distance (parent_pop);
+
+    report_pop(*parent_pop,fpt1);
     
 }
 
@@ -145,6 +147,12 @@ void NSGA2::init_streams() {
     fpt3.open("nsga2_best_pop.out"    , ios::out | ios::trunc);
     fpt4.open("nsga2_all_pop.out"     , ios::out | ios::trunc);
     fpt5.open("nsga2_params.out"      , ios::out | ios::trunc);
+
+    fpt1.setf(ios::scientific);
+    fpt2.setf(ios::scientific);
+    fpt3.setf(ios::scientific);
+    fpt4.setf(ios::scientific);
+    fpt5.setf(ios::scientific);
 
     fpt1 << "# This file contains the data of initial population\n";
     fpt2 << "# This file contains the data of final population\n";
@@ -209,3 +217,10 @@ void NSGA2::report_parameters(std::ostream& os) const {
     }
     os << "\nSeed for random number generator = " << seed << endl;
 }
+
+void NSGA2::report_pop(const population& pop, std::ostream& os) const {
+
+    pop.report(os);
+    
+}
+

@@ -1,6 +1,8 @@
 #include <nsga2/global.h>
 #include <nsga2/NSGA2.h>
 
+#include "rand.h"
+
 #include <vector>
 #include <numeric>
 #include <iostream>
@@ -16,7 +18,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    double seed = atof(argv[1]);
+    seed = atof(argv[1]);
     if (seed<=0.0 || seed>=1.0) {
         cout << "Entered seed value is wrong, seed value must be in (0,1)" << endl;
         return 1;

@@ -94,6 +94,7 @@ namespace nsga2 {
     private:
         void init_streams();
         void report_parameters(std::ostream& os) const;
+        void report_pop(const population& pop, std::ostream& os) const;
         
         int nbinmut;
         int nrealmut;
