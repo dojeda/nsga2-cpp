@@ -5,6 +5,8 @@
 
 #include <vector>
 #include <utility>
+#include <iostream>
+#include <fstream>
 
 namespace nsga2 {
 
@@ -88,23 +90,23 @@ namespace nsga2 {
         // int obj3;
         // int angle1;
         // int angle2;
-
+        
     private:
+        void init_streams();
+        void report_parameters(std::ostream& os) const;
+        
         int nbinmut;
         int nrealmut;
         int nbincross;
         int nrealcross;
         int bitlength;
         // random generator?
-        // FILE *fpt1;
-        // FILE *fpt2;
-        // FILE *fpt3;
-        // FILE *fpt4;
-        // FILE *fpt5;
+        std::ofstream fpt1;
+        std::ofstream fpt2;
+        std::ofstream fpt3;
+        std::ofstream fpt4;
+        std::ofstream fpt5;
         // FILE *gp;
-        // population *parent_pop;
-        // population *child_pop;
-        // population *mixed_pop;
         population* parent_pop;
         population* child_pop;
         population* mixed_pop;

@@ -2,6 +2,8 @@
 #include "rand.h"
 
 #include <iostream>
+#include <numeric>
+#include <string>
 
 using namespace nsga2;
 using namespace std;
@@ -91,10 +93,15 @@ void NSGA2::initialize() throw (nsga2exception) {
     if (limits_binvar.size() != nbin)
         throw nsga2exception("Invalid number of binary variable limits");
 
+
+    init_streams();
+    report_parameters(fpt5);
+    
     nbinmut    = 0;
     nrealmut   = 0;
     nbincross  = 0;
     nrealcross = 0;
+    bitlength  = std::accumulate(nbits.begin(), nbits.end(), 0);
 
     parent_pop = new population(popsize,
                                 nreal,
@@ -130,4 +137,75 @@ void NSGA2::initialize() throw (nsga2exception) {
     //parent_pop->assign_rank_and_crowding_distance();
     // assign_rank_and_crowding_distance (parent_pop);
     
+}
+
+void NSGA2::init_streams() {
+    fpt1.open("nsga2_initial_pop.out" , ios::out | ios::trunc);
+    fpt2.open("nsga2_final_pop.out"   , ios::out | ios::trunc);
+    fpt3.open("nsga2_best_pop.out"    , ios::out | ios::trunc);
+    fpt4.open("nsga2_all_pop.out"     , ios::out | ios::trunc);
+    fpt5.open("nsga2_params.out"      , ios::out | ios::trunc);
+
+    fpt1 << "# This file contains the data of initial population\n";
+    fpt2 << "# This file contains the data of final population\n";
+    fpt3 << "# This file contains the data of final feasible population (if found)\n";
+    fpt4 << "# This file contains the data of all generations\n";
+    fpt5 << "# This file contains information about inputs as read by the program\n";
+
+    fpt1 << "# of objectives = "    << nobj
+         << ", # of constraints = " << ncon
+         << ", # of real_var = "    << nreal
+         << ", # of bits of bin_var = " << bitlength
+         << ", constr_violation, rank, crowding_distance\n";
+    fpt2 << "# of objectives = "    << nobj
+         << ", # of constraints = " << ncon
+         << ", # of real_var = "    << nreal
+         << ", # of bits of bin_var = " << bitlength
+         << ", constr_violation, rank, crowding_distance\n";
+    fpt3 << "# of objectives = "    << nobj
+         << ", # of constraints = " << ncon
+         << ", # of real_var = "    << nreal
+         << ", # of bits of bin_var = " << bitlength
+         << ", constr_violation, rank, crowding_distance\n";
+    fpt4 << "# of objectives = "    << nobj
+         << ", # of constraints = " << ncon
+         << ", # of real_var = "    << nreal
+         << ", # of bits of bin_var = " << bitlength
+         << ", constr_violation, rank, crowding_distance\n";
+}
+
+void NSGA2::report_parameters(std::ostream& os) const {
+    os << "Population size = " << popsize
+       << "\nNumber of generations = " << ngen
+       << "\nNumber of objective functions = " << nobj
+       << "\nNumber of constraints = " << ncon
+       << "\nNumber of real variables = " << nreal;
+
+    if (nreal != 0) {
+        for (int i = 0; i<nreal; ++i) {
+            os << "\nLower limit of real variable " << (i+1)
+               << " = " << limits_realvar[i].first;
+            os << "\nUpper limit of real variable " << (i+1)
+               << " = " << limits_realvar[i].second;
+        }
+        os << "\nProbability of crossover of real variable = " << pcross_real;
+        os << "\nProbability of mutation of real variable = " << pmut_real;
+        os << "\nDistribution index for crossover = " << eta_c;
+        os << "\nDistribution index for mutation = " << eta_m;
+    }
+    
+    os << "\nNumber of binary variables = " << nbin;
+    if (nbin != 0) {
+        for (int i = 0; i<nbin; ++i) {
+            os << "\nNumber of bits for binary variable " << (i+1)
+               << " = " << nbits[i];
+            os << "\nLower limit of real variable " << (i+1)
+               << " = " << limits_binvar[i].first;
+            os << "\nUpper limit of real variable " << (i+1)
+               << " = " << limits_binvar[i].second;
+        }
+        os << "Probability of crossover of binary variable = " << pcross_bin;
+        os << "Probability of mutation of binary variable = " << pmut_bin;
+    }
+    os << "\nSeed for random number generator = " << seed << endl;
 }

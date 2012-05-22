@@ -28,7 +28,7 @@ void insert (list *node, int x)
     return;
 }
 
-/* Delete the node NODE from the list */
+/* Delete the node NODE from the list. Return the element before (the parent) */
 list* del (list *node)
 {
     list *temp;
