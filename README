@@ -1,6 +1,7 @@
 A C++ implementation of the NSGA-II algorithm based on the original C implementation.
 
 First version that ignores some of the existing code and sticks to the paper definition
+Test branch
 
 Original code in C from:
 Kanpur Genetic Algorithms Laboratory
