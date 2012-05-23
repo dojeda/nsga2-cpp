@@ -108,6 +108,8 @@ struct population {
     std::vector<individual> ind;
     std::vector< std::vector<int > > front;
 
+    bool crowd_obj; // true: crowding over objective (default) false: crowding over real vars
+    
 private:
     individual_config ind_config;
     friend std::ostream& operator<< (std::ostream& os, const population& pop);
