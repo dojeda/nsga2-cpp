@@ -23,10 +23,10 @@ struct individual_config {
     // int ngen;
     // double pcross_real;
     // double pcross_bin;
-    // double pmut_real;
-    // double pmut_bin;
+    double pmut_real;
+    double pmut_bin;
     // double eta_c;
-    // double eta_m;
+    double eta_m;
     std::vector<int> nbits;
     std::vector< std::pair<double,double> > limits_realvar;
     std::vector< std::pair<double,double> > limits_binvar;
@@ -46,6 +46,9 @@ struct individual {
 
     void decode();
     void evaluate();
+    std::pair<int,int> mutate();
+    int real_mutate();
+    int bin_mutate();
 
     int check_dominance(const individual& b) const;
     
@@ -77,7 +80,10 @@ struct population {
                const std::vector<int>& nbits,
                const std::vector< std::pair<double,double> >& limreal,
                const std::vector< std::pair<double,double> >& limbin,
-               const int nobj) throw (nsga2::nsga2exception);
+               const int nobj,
+               const double pmut_real,
+               const double pmut_bin,
+               const double eta_m) throw (nsga2::nsga2exception);
     virtual ~population();
 
     void initialize() throw (nsga2::nsga2exception);
@@ -85,6 +91,7 @@ struct population {
     void decode();
     void evaluate();
     void fast_nds();
+    std::pair<int,int> mutate();
 
     void report(std::ostream& os) const;
 

@@ -170,6 +170,72 @@ int individual::check_dominance(const individual& b) const {
     }
 }
 
+// returns num_mut_real, num_mut_bin
+std::pair<int,int> individual::mutate() {
+    std::pair<int,int> num_mut = std::make_pair(0,0);
+    if (config->nreal)
+        num_mut.first  += real_mutate();
+    if (config->nbin)
+        num_mut.second += bin_mutate();
+    return num_mut;
+}
+
+int individual::real_mutate() {
+    int j;
+    double rnd, delta1, delta2, mut_pow, deltaq;
+    double y, yl, yu, val, xy;
+    int num_mut = 0;
+    for (j=0; j<config->nreal; j++) {
+        if (randomperc() <= config->pmut_real) {
+            y = xreal[j];
+            yl = config->limits_realvar[j].first;
+            yu = config->limits_realvar[j].second;
+            delta1 = (y-yl)/(yu-yl);
+            delta2 = (yu-y)/(yu-yl);
+            rnd = randomperc();
+            mut_pow = 1.0/(config->eta_m+1.0);
+            if (rnd <= 0.5) {
+                xy = 1.0-delta1;
+                val = 2.0*rnd+(1.0-2.0*rnd)*(pow(xy,(config->eta_m+1.0)));
+                deltaq =  pow(val,mut_pow) - 1.0;
+            } else {
+                xy = 1.0-delta2;
+                val = 2.0*(1.0-rnd)+2.0*(rnd-0.5)*(pow(xy,(config->eta_m+1.0)));
+                deltaq = 1.0 - (pow(val,mut_pow));
+            }
+            y = y + deltaq*(yu-yl);
+            if (y<yl)
+                y = yl;
+            if (y>yu)
+                y = yu;
+            xreal[j] = y;
+            num_mut+=1;
+        }
+    }
+    return num_mut;
+}
+
+int individual::bin_mutate() {
+    int j, k;
+    double prob;
+    int num_mut = 0;
+    for (j=0; j<config->nbin; j++) {
+        for (k=0; k<config->nbits[j]; k++) {
+            prob = randomperc();
+            if (prob <=config->pmut_bin) {
+                if (gene[j][k] == 0) {
+                    gene[j][k] = 1;
+                } else {
+                    gene[j][k] = 0;
+                }
+                num_mut+=1;
+            }
+        }
+    }
+    return num_mut;
+}
+
+
 std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
     
     os << "{Individual rank=" << ind.rank
@@ -232,16 +298,22 @@ population::population(const int size,
                        const std::vector<int>& nbits,
                        const std::vector< std::pair<double,double> >& limreal,
                        const std::vector< std::pair<double,double> >& limbin,
-                       const int nobj) throw (nsga2::nsga2exception) :
+                       const int nobj,
+                       const double pmut_real,
+                       const double pmut_bin,
+                       const double eta_m) throw (nsga2::nsga2exception) :
     ind_config() {
 
-    ind_config.nreal = nreal;
-    ind_config.nbin  = nbin;
-    ind_config.nobj  = nobj;
-    ind_config.ncon  = ncon;
-    ind_config.nbits = nbits;
+    ind_config.nreal          = nreal;
+    ind_config.nbin           = nbin;
+    ind_config.nobj           = nobj;
+    ind_config.ncon           = ncon;
+    ind_config.nbits          = nbits;
     ind_config.limits_realvar = limreal;
     ind_config.limits_binvar  = limbin;
+    ind_config.pmut_real      = pmut_real;
+    ind_config.pmut_bin       = pmut_bin;
+    ind_config.eta_m          = eta_m;
     
     for (unsigned int i = 0; i < size; ++i) {
         ind.push_back(individual(ind_config));
@@ -358,6 +430,21 @@ void population::report(std::ostream& os) const {
            << it->crowd_dist << '\n';
         
     }
+}
+
+std::pair<int,int> population::mutate() {
+    std::pair<int,int>
+        num_mut = std::make_pair(0,0),
+        tmp = std::make_pair(0,0);
+    std::vector<individual>::iterator it;
+    for (it  = ind.begin();
+         it != ind.end();
+         ++it) {
+        tmp = it->mutate();
+        num_mut.first  += tmp.first;
+        num_mut.second += tmp.second;
+    }
+    return num_mut;
 }
 
 std::ostream& nsga2::operator<< (std::ostream& os, const population& pop) {

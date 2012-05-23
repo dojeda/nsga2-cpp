@@ -112,7 +112,10 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 nbits,
                                 limits_realvar,
                                 limits_binvar,
-                                nobj);
+                                nobj,
+                                pmut_real,
+                                pmut_bin,
+                                eta_m);
     child_pop  = new population(popsize,
                                 nreal,
                                 nbin,
@@ -120,7 +123,10 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 nbits,
                                 limits_realvar,
                                 limits_binvar,
-                                nobj);
+                                nobj,
+                                pmut_real,
+                                pmut_bin,
+                                eta_m);
     mixed_pop  = new population(popsize*2,
                                 nreal,
                                 nbin,
@@ -128,7 +134,10 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 nbits,
                                 limits_realvar,
                                 limits_binvar,
-                                nobj);
+                                nobj,
+                                pmut_real,
+                                pmut_bin,
+                                eta_m);
 
     randomize();
     parent_pop->initialize();
@@ -141,6 +150,7 @@ void NSGA2::initialize() throw (nsga2exception) {
     // assign_rank_and_crowding_distance (parent_pop);
 
     selection(*parent_pop,*child_pop);
+    child_pop->mutate();
     
     report_pop(*parent_pop,fpt1);
     fpt1 << "#Test David\n";
