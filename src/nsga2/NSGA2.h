@@ -8,6 +8,10 @@
 #include <iostream>
 #include <fstream>
 
+extern "C" {
+    extern double seed;
+}
+
 namespace nsga2 {
 
 class NSGA2 {
@@ -19,6 +23,9 @@ public:
     void advance();
     void evolve();
 
+    void set_seed(double s) {
+        seed = s;
+    };
     void set_function(individual_config::funcType f) {
         this->function = f;
     };
