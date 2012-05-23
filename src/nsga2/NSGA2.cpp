@@ -146,16 +146,38 @@ void NSGA2::initialize() throw (nsga2exception) {
     parent_pop->decode();
     parent_pop->evaluate();
     parent_pop->fast_nds();
+    parent_pop->crowding_distance_all();
+    
+    report_pop(*parent_pop, fpt1);
     //parent_pop->assign_rank_and_crowding_distance();
     // assign_rank_and_crowding_distance (parent_pop);
 
     selection(*parent_pop,*child_pop);
     child_pop->mutate();
+    child_pop->decode();
+    child_pop->evaluate();
+
+    mixed_pop->merge(*child_pop,*parent_pop);
+    mixed_pop->fast_nds();
+    //report_pop(*parent_pop,fpt1);
+
+    int i = 0;
+    parent_pop->ind.clear();
+    while (parent_pop->size() + mixed_pop->front[i].size() < popsize) {
+        std::vector<int>& F = mixed_pop->front[i];
+        mixed_pop->crowding_distance(i);
+        for (int j = 0; j < F.size(); ++j)
+            parent_pop->ind.push_back(mixed_pop->ind[F[j]]);
+        i += 1;
+    }
+
+    // sort( F[i], < )
+    // insert first popsize-parent_pop->ind.size() elements
+    cout << "Missing: " << popsize - parent_pop->ind.size() << endl;
+    // Create new child_pop
     
-    report_pop(*parent_pop,fpt1);
-    fpt1 << "#Test David\n";
-    report_pop(*child_pop,fpt1);
-    
+    // fpt1 << "#Test David\n";
+    // report_pop(*parent_pop,fpt1);    
 }
 
 void NSGA2::init_streams() {

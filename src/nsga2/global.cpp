@@ -318,7 +318,7 @@ population::population(const int size,
     for (unsigned int i = 0; i < size; ++i) {
         ind.push_back(individual(ind_config));
     }
-    
+
 }
 
 population::~population() {
@@ -351,8 +351,10 @@ void population::evaluate() {
     }
 }
 
-void population::fast_nds() { // TODO: should return F?
-    std::vector< std::vector<int> >  F(1);
+void population::fast_nds() { 
+    front.resize(1);
+    front[0].clear();
+    //std::vector< std::vector<int> >  F(1);
     int i,j;
     for (i = 0; i < ind.size(); ++i) {
         
@@ -374,19 +376,19 @@ void population::fast_nds() { // TODO: should return F?
 
         if (p.dcounter == 0) {
             p.rank = 1;
-            F[0].push_back(i);
+            front[0].push_back(i);
         }
         
     }
 
     int fi = 1;
-    while (F[fi-1].size() > 0) {
+    while (front[fi-1].size() > 0) {
 
-        std::vector<int>& Fi = F[fi-1];
+        std::vector<int>& fronti = front[fi-1];
         std::vector<int> Q;
-        for (i = 0; i < Fi.size(); ++i) {
+        for (i = 0; i < fronti.size(); ++i) {
             
-            individual& p = ind[Fi[i]];
+            individual& p = ind[fronti[i]];
             
             for (j = 0; j < p.dominated.size() ; ++j) {
 
@@ -403,8 +405,62 @@ void population::fast_nds() { // TODO: should return F?
         
 
         fi += 1;
-        F.push_back(Q);
+        front.push_back(Q);
     }
+    
+}
+
+struct comparator_obj {
+    comparator_obj(const population& population, int objm) :
+        pop(population), m(objm) {};
+    const population& pop;
+    int m;
+    bool operator() (int i, int j) {
+        return pop.ind[i].obj[m] < pop.ind[j].obj[m];
+    };
+};
+
+void population::crowding_distance_all() {
+    for (int i = 0; i < front.size(); ++i)
+        crowding_distance(i);
+}
+
+void population::crowding_distance(int fronti) {
+
+    std::vector<int>& F = front[fronti];
+    if (F.size() == 0 ) return;
+    
+    const int l = F.size();
+    
+    for (int i = 0; i < l; ++i)
+        ind[F[i]].crowd_dist = 0;
+    
+    for (int m = 0; m < ind_config.nobj; ++m) {
+        std::sort(F.begin(), F.end(), comparator_obj(*this,m));
+        double fmin = ind[F[0]].obj[m];
+        double fmax = ind[F[l-1]].obj[m];
+        ind[F[0]].crowd_dist = ind[F[l-1]].crowd_dist = INF;
+        for (int i = 1; i < l-1; ++i) {
+            if (ind[F[i]].crowd_dist != INF && fmax != fmin)
+                ind[F[i]].crowd_dist +=
+                    (ind[F[i+1]].obj[m] - ind[F[i-1]].obj[m]) / (fmax - fmin);
+        }
+    }
+
+    for (int i=0; i < l; ++i) { // this is deduced from code, not mentioned in paper
+        if (ind[F[i]].crowd_dist != INF)
+            ind[F[i]].crowd_dist /= ind_config.nobj;
+    }
+}
+
+void population::merge(const population& pop1, const population& pop2)
+    throw (nsga2::nsga2exception) {
+
+    if (size() < pop1.size() + pop2.size())
+        throw nsga2::nsga2exception("Merge: target population not big enough");
+
+    std::copy(pop1.ind.begin(), pop1.ind.end(), ind.begin());
+    std::copy(pop2.ind.begin(), pop2.ind.end(), ind.begin() + pop1.size());
     
 }
 

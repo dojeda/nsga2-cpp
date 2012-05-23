@@ -9,6 +9,7 @@
 #include "nsga2/exception.h"
 
 #define EPS 1e-14
+#define INF 1e+14
 
 namespace nsga2 {
 
@@ -91,7 +92,12 @@ struct population {
     void decode();
     void evaluate();
     void fast_nds();
+    void crowding_distance_all();
+    void crowding_distance(int fronti);
+    
     std::pair<int,int> mutate();
+    void merge(const population& pop1, const population& pop2)
+    throw (nsga2::nsga2exception);
 
     void report(std::ostream& os) const;
 
@@ -100,6 +106,7 @@ struct population {
     };
         
     std::vector<individual> ind;
+    std::vector< std::vector<int > > front;
 
 private:
     individual_config ind_config;
