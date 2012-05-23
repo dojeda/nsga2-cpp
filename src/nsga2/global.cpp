@@ -3,6 +3,7 @@
 
 #include <cmath> // only for test problem def
 #include <iostream>
+#include <algorithm>
 
 using namespace nsga2;
 using namespace std;
@@ -315,7 +316,7 @@ population::population(const int size,
     ind_config.pmut_bin       = pmut_bin;
     ind_config.eta_m          = eta_m;
     
-    for (unsigned int i = 0; i < size; ++i) {
+    for (int i = 0; i < size; ++i) {
         ind.push_back(individual(ind_config));
     }
 
@@ -435,10 +436,10 @@ void population::crowding_distance(int fronti) {
     for (int i = 0; i < l; ++i)
         ind[F[i]].crowd_dist = 0;
 
-    for (int m = 0; m < ind_config.nobj; ++m) {
-        std::sort(F.begin(), F.end(), comparator_obj(*this,m));
-        ind[F[0]].crowd_dist = INF;
-    }
+    // for (int m = 0; m < ind_config.nobj; ++m) {
+    //     std::sort(F.begin(), F.end(), comparator_obj(*this,m));
+    //     ind[F[0]].crowd_dist = INF;
+    // }
     
     for (int m = 0; m < ind_config.nobj; ++m) {
         
@@ -448,7 +449,10 @@ void population::crowding_distance(int fronti) {
         // this is only done to the first one or to the two first when size=2
         // ind[F[0]].crowd_dist = INF;
         // if (l == 2)
-        //     ind[F[0]].crowd_dist = ind[F[1]].crowd_dist = INF;
+        //      ind[F[0]].crowd_dist = ind[F[1]].crowd_dist = INF;
+        ind[F[0]].crowd_dist = INF;
+        if (l > 1)
+            ind[F[l-1]].crowd_dist = INF;
         
         for (int i = 1; i < l-1; ++i) {
             if (ind[F[i]].crowd_dist != INF &&
@@ -459,10 +463,10 @@ void population::crowding_distance(int fronti) {
         }
     }
 
-    for (int i=0; i < l; ++i) { // this is deduced from code, not mentioned in paper
-        if (ind[F[i]].crowd_dist != INF)
-            ind[F[i]].crowd_dist /= ind_config.nobj;
-    }
+    // for (int i=0; i < l; ++i) { // this is deduced from code, not mentioned in paper
+    //     if (ind[F[i]].crowd_dist != INF)
+    //         ind[F[i]].crowd_dist /= ind_config.nobj;
+    // }
 }
 
 void population::merge(const population& pop1, const population& pop2)

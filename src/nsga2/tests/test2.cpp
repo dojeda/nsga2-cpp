@@ -347,7 +347,7 @@ int main(int argc, char *argv[]) {
     nsga2.set_limits_binvar(limits_binvar);
 
     nsga2.initialize();
-    nsga2.advance();
+    nsga2.evolve();
     
     return 0;
 }

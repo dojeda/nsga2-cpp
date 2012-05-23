@@ -233,10 +233,12 @@ void NSGA2::report_parameters(std::ostream& os) const {
 }
 
 void NSGA2::report_pop(const population& pop, std::ostream& os) const {
-
     pop.report(os);
-    
 }
+
+// void NSGA2::report_feasible(const population& pop, std::ostream& os) const {
+//     pop.report_feasible(os);
+// }
 
 void NSGA2::selection(population& oldpop, population& newpop)
     throw (nsga2::nsga2exception) {
@@ -268,7 +270,6 @@ void NSGA2::selection(population& oldpop, population& newpop)
         crossover(p21,p22,newpop.ind[i+2],newpop.ind[i+3]);
     }
 
-    cout << "Bye" << endl;
 }
 
 individual& NSGA2::tournament(individual& ind1, individual& ind2) const {
@@ -430,20 +431,22 @@ void printme(const individual& ind) {
 
 void NSGA2::advance() {
 
+    cout << "Advancing to generation " << t+1 << endl;
+    
     // create next population Qt
     selection(*parent_pop,*child_pop);
     child_pop->mutate();
     child_pop->decode();
     child_pop->evaluate();
 
-    fpt4 << "#Child pop\n";
-    report_pop(*child_pop,fpt4);
+    // fpt4 << "#Child pop\n";
+    // report_pop(*child_pop,fpt4);
     
     // create population Rt = Pt U Qt
     mixed_pop->merge(*parent_pop,*child_pop);
 
-    fpt4 << "#Mixed\n";
-    report_pop(*mixed_pop, fpt4);
+    // fpt4 << "#Mixed\n";
+    // report_pop(*mixed_pop, fpt4);
     
     mixed_pop->fast_nds();
     //mixed_pop->crowding_distance_all();
@@ -468,12 +471,19 @@ void NSGA2::advance() {
     std::sort(mixed_pop->front[i].begin(),
               mixed_pop->front[i].end(),
               sort_n(*mixed_pop) );// sort remaining front using <n
-    
-    for (int j = 0; j < popsize - parent_pop->ind.size(); ++j) // Pt+1 = Pt+1 U Fi[1:N-|Pt+1|]
+
+    const int extra = popsize - parent_pop->size();
+    for (int j = 0; j < extra; ++j) // Pt+1 = Pt+1 U Fi[1:N-|Pt+1|]
         parent_pop->ind.push_back(mixed_pop->ind[mixed_pop->front[i][j]]);        
 
     t += 1;
     fpt4 << "# gen = " << t << '\n';
     report_pop(*parent_pop,fpt4);    
 
+}
+
+void NSGA2::evolve() {
+    while (t < ngen)
+        advance();
+    report_pop(*parent_pop,fpt2);
 }

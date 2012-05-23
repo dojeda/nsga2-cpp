@@ -17,6 +17,7 @@ public:
 
     void initialize() throw (nsga2exception);
     void advance();
+    void evolve();
 
     void set_nreal(int nreal) {
         this->nreal = nreal;
