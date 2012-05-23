@@ -8,6 +8,8 @@
 
 #include "nsga2/exception.h"
 
+#define EPS 1e-14
+
 namespace nsga2 {
 
 class NSGA2;
@@ -62,7 +64,6 @@ struct individual {
 private:
     const individual_config* config;
     friend std::ostream& operator<< (std::ostream& os, const individual& ind);
-    friend class NSGA2;
 };
 
 std::ostream& operator<< (std::ostream& os, const individual& ind);
