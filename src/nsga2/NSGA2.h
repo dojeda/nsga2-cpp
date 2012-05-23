@@ -21,7 +21,10 @@ public:
 
     void set_function(individual_config::funcType f) {
         this->function = f;
-    };    
+    };
+    void set_crowdobj(bool crowd) {
+        this->crowd_obj = crowd;
+    };
     void set_nreal(int nreal) {
         this->nreal = nreal;
     };
@@ -128,6 +131,7 @@ private:
     population* parent_pop;
     population* child_pop;
     population* mixed_pop;
+    bool crowd_obj;
 };
     
 }

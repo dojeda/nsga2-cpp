@@ -40,7 +40,8 @@ NSGA2::NSGA2() :
     bitlength(0),
     parent_pop(0),
     child_pop(0),
-    mixed_pop(0) {
+    mixed_pop(0),
+    crowd_obj(true) {
 }
 
 NSGA2::~NSGA2() {
@@ -144,6 +145,10 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 pmut_bin,
                                 eta_m,
                                 function);
+
+    parent_pop->crowd_obj = crowd_obj;
+    child_pop->crowd_obj = crowd_obj;
+    mixed_pop->crowd_obj = crowd_obj;
 
     randomize();
     parent_pop->initialize();
