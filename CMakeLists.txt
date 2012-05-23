@@ -16,6 +16,7 @@ set(NSGA2_SOURCE_FILES
 set(NSGA2_HEADER_FILES
   src/nsga2/global.h
   src/nsga2/NSGA2.h
+  src/nsga2/exception.h
   src/rand.h)
 
 include_directories(src)
