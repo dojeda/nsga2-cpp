@@ -16,6 +16,7 @@ public:
     virtual ~NSGA2();
 
     void initialize() throw (nsga2exception);
+    void advance();
 
     void set_nreal(int nreal) {
         this->nreal = nreal;
@@ -90,6 +91,7 @@ private:
     // int obj3;
     // int angle1;
     // int angle2;
+    int t;
         
 private:
     void init_streams();

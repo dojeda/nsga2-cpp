@@ -416,7 +416,7 @@ struct comparator_obj {
     const population& pop;
     int m;
     bool operator() (int i, int j) {
-        return pop.ind[i].obj[m] < pop.ind[j].obj[m];
+        return pop.ind[i].obj[m] <= pop.ind[j].obj[m];
     };
 };
 
@@ -427,23 +427,35 @@ void population::crowding_distance_all() {
 
 void population::crowding_distance(int fronti) {
 
-    std::vector<int>& F = front[fronti];
+    std::vector<int> F = front[fronti];
     if (F.size() == 0 ) return;
     
     const int l = F.size();
     
     for (int i = 0; i < l; ++i)
         ind[F[i]].crowd_dist = 0;
-    
+
     for (int m = 0; m < ind_config.nobj; ++m) {
         std::sort(F.begin(), F.end(), comparator_obj(*this,m));
-        double fmin = ind[F[0]].obj[m];
-        double fmax = ind[F[l-1]].obj[m];
-        ind[F[0]].crowd_dist = ind[F[l-1]].crowd_dist = INF;
+        ind[F[0]].crowd_dist = INF;
+    }
+    
+    for (int m = 0; m < ind_config.nobj; ++m) {
+        
+        std::sort(F.begin(), F.end(), comparator_obj(*this,m));
+
+        // in the paper dist=INF for the first and last, in the code
+        // this is only done to the first one or to the two first when size=2
+        // ind[F[0]].crowd_dist = INF;
+        // if (l == 2)
+        //     ind[F[0]].crowd_dist = ind[F[1]].crowd_dist = INF;
+        
         for (int i = 1; i < l-1; ++i) {
-            if (ind[F[i]].crowd_dist != INF && fmax != fmin)
+            if (ind[F[i]].crowd_dist != INF &&
+                ind[F[l-1]].obj[m] != ind[F[0]].obj[m])
                 ind[F[i]].crowd_dist +=
-                    (ind[F[i+1]].obj[m] - ind[F[i-1]].obj[m]) / (fmax - fmin);
+                    (ind[F[i+1]].obj[m] - ind[F[i-1]].obj[m])
+                    / (ind[F[l-1]].obj[m] - ind[F[0]].obj[m]);
         }
     }
 

@@ -147,37 +147,12 @@ void NSGA2::initialize() throw (nsga2exception) {
     parent_pop->evaluate();
     parent_pop->fast_nds();
     parent_pop->crowding_distance_all();
+
+    t = 1;
+    report_pop(*parent_pop,fpt1);
+    fpt4 << "# gen = " << t << '\n';
+    report_pop(*parent_pop,fpt4);
     
-    report_pop(*parent_pop, fpt1);
-    //parent_pop->assign_rank_and_crowding_distance();
-    // assign_rank_and_crowding_distance (parent_pop);
-
-    selection(*parent_pop,*child_pop);
-    child_pop->mutate();
-    child_pop->decode();
-    child_pop->evaluate();
-
-    mixed_pop->merge(*child_pop,*parent_pop);
-    mixed_pop->fast_nds();
-    //report_pop(*parent_pop,fpt1);
-
-    int i = 0;
-    parent_pop->ind.clear();
-    while (parent_pop->size() + mixed_pop->front[i].size() < popsize) {
-        std::vector<int>& F = mixed_pop->front[i];
-        mixed_pop->crowding_distance(i);
-        for (int j = 0; j < F.size(); ++j)
-            parent_pop->ind.push_back(mixed_pop->ind[F[j]]);
-        i += 1;
-    }
-
-    // sort( F[i], < )
-    // insert first popsize-parent_pop->ind.size() elements
-    cout << "Missing: " << popsize - parent_pop->ind.size() << endl;
-    // Create new child_pop
-    
-    // fpt1 << "#Test David\n";
-    // report_pop(*parent_pop,fpt1);    
 }
 
 void NSGA2::init_streams() {
@@ -432,4 +407,73 @@ void NSGA2::bincross(const individual& parent1, const individual& parent2,
         }
     }
     
+}
+
+struct sort_n {
+    const population& pop;
+    sort_n(const population& population) : pop(population) {};
+    bool operator() (int i, int j) {
+        const individual& ind1 = pop.ind[i];
+        const individual& ind2 = pop.ind[j];
+        if (ind1.rank < ind2.rank)
+            return true;
+        else if (ind1.rank == ind2.rank &&
+                 ind1.crowd_dist > ind2.crowd_dist)
+            return true;
+        return false;
+    };
+};
+
+void printme(const individual& ind) {
+    cout << ind << endl;
+}
+
+void NSGA2::advance() {
+
+    // create next population Qt
+    selection(*parent_pop,*child_pop);
+    child_pop->mutate();
+    child_pop->decode();
+    child_pop->evaluate();
+
+    fpt4 << "#Child pop\n";
+    report_pop(*child_pop,fpt4);
+    
+    // create population Rt = Pt U Qt
+    mixed_pop->merge(*parent_pop,*child_pop);
+
+    fpt4 << "#Mixed\n";
+    report_pop(*mixed_pop, fpt4);
+    
+    mixed_pop->fast_nds();
+    //mixed_pop->crowding_distance_all();
+
+    // fpt4 << "#Mixed nfs\n";
+    // report_pop(*mixed_pop, fpt4);
+        
+
+    // Pt+1 = empty
+    parent_pop->ind.clear();
+
+    int i = 0;
+    // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
+    while (parent_pop->size() + mixed_pop->front[i].size() < popsize) {
+        std::vector<int>& Fi = mixed_pop->front[i]; 
+        mixed_pop->crowding_distance(i);           // calculate crowding in Fi
+        for (int j = 0; j < Fi.size(); ++j)        // Pt+1 = Pt+1 U Fi
+            parent_pop->ind.push_back(mixed_pop->ind[Fi[j]]);
+        i += 1;
+    }
+
+    std::sort(mixed_pop->front[i].begin(),
+              mixed_pop->front[i].end(),
+              sort_n(*mixed_pop) );// sort remaining front using <n
+    
+    for (int j = 0; j < popsize - parent_pop->ind.size(); ++j) // Pt+1 = Pt+1 U Fi[1:N-|Pt+1|]
+        parent_pop->ind.push_back(mixed_pop->ind[mixed_pop->front[i][j]]);        
+
+    t += 1;
+    fpt4 << "# gen = " << t << '\n';
+    report_pop(*parent_pop,fpt4);    
+
 }
