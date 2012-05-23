@@ -1,7 +1,7 @@
 #include "nsga2/global.h"
 #include "rand.h"
 
-#include <cmath> // only for test problem def
+#include <cmath> 
 #include <iostream>
 #include <algorithm>
 
@@ -78,22 +78,7 @@ void individual::decode() {
             (double)sum*( config->limits_binvar[i].second - config->limits_binvar[i].first) / (double)((1 << (config->nbits[i]))-1); // TODO: check
     }
 }
-
-void test_problem (double *xreal,
-                   double *xbin,
-                   int **gene,
-                   double *obj,
-                   double *constr) {
-    // obj[0] = 4.0*(xreal[0]*xreal[0] + xreal[1]*xreal[1]);
-    // obj[1] = std::pow((xreal[0]-5.0),2.0) + std::pow((xreal[1]-5.0),2.0);
-    // constr[0] = 1.0 - (std::pow((xreal[0]-5.0),2.0) + xreal[1]*xreal[1])/25.0;
-    // constr[1] = (std::pow((xreal[0]-8.0),2.0) + std::pow((xreal[1]+3.0),2.0))/7.7 - 1.0;
-
-    obj[0] = pow(xreal[0],2.0);
-    obj[1] = pow((xreal[0]-2.0),2.0);
-    return;
-}
-
+ 
 void individual::evaluate() {
 
     // workaround to respect the signature of test_problem and its (int**)
@@ -101,8 +86,8 @@ void individual::evaluate() {
     for (unsigned i=0; i < gene.size(); ++i) {
         tmp[i] = &(gene[i][0]);
     }
-    // TODO: change test_problem so one can change it to whatever
-    test_problem (&xreal[0], &xbin[0], &tmp[0], &obj[0], &constr[0]);
+    
+    (*config->function) (&xreal[0], &xbin[0], &tmp[0], &obj[0], &constr[0]);
     
     if (config->ncon) {
         for (int i = 0; i < config->ncon; ++i)
@@ -302,7 +287,9 @@ population::population(const int size,
                        const int nobj,
                        const double pmut_real,
                        const double pmut_bin,
-                       const double eta_m) throw (nsga2::nsga2exception) :
+                       const double eta_m,
+                       const individual_config::funcType func)
+    throw (nsga2::nsga2exception) :
     crowd_obj(true),
     ind_config() {
 
@@ -316,6 +303,7 @@ population::population(const int size,
     ind_config.pmut_real      = pmut_real;
     ind_config.pmut_bin       = pmut_bin;
     ind_config.eta_m          = eta_m;
+    ind_config.function       = func;
     
     for (int i = 0; i < size; ++i) {
         ind.push_back(individual(ind_config));

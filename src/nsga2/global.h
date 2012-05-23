@@ -16,6 +16,13 @@ namespace nsga2 {
 class NSGA2;
 
 struct individual_config {
+
+    typedef void (*funcType)(double *,
+                             double *,
+                             int **,
+                             double *,
+                             double *);
+    
     int nreal;
     int nbin;
     int nobj;
@@ -31,7 +38,7 @@ struct individual_config {
     std::vector<int> nbits;
     std::vector< std::pair<double,double> > limits_realvar;
     std::vector< std::pair<double,double> > limits_binvar;
-
+    funcType function;
 };
     
 struct individual {
@@ -84,7 +91,9 @@ struct population {
                const int nobj,
                const double pmut_real,
                const double pmut_bin,
-               const double eta_m) throw (nsga2::nsga2exception);
+               const double eta_m,
+               const individual_config::funcType func)
+        throw (nsga2::nsga2exception);
     virtual ~population();
 
     void initialize() throw (nsga2::nsga2exception);

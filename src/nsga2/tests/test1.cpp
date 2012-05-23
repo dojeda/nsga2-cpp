@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     std::vector< std::pair<double,double> > limr = conf.limits_realvar;
     std::vector< std::pair<double,double> > limb = conf.limits_binvar;
-    nsga2::population pop(4,3,3,2,nbits,limr,limb,2,0.7,0.1,10);
+    nsga2::population pop(4,3,3,2,nbits,limr,limb,2,0.7,0.1,10,NULL);
 
     pop.initialize();
     cout << "Population: " << pop << endl;

@@ -14,11 +14,14 @@ class NSGA2 {
 public:
     NSGA2();
     virtual ~NSGA2();
-
+    
     void initialize() throw (nsga2exception);
     void advance();
     void evolve();
 
+    void set_function(individual_config::funcType f) {
+        this->function = f;
+    };    
     void set_nreal(int nreal) {
         this->nreal = nreal;
     };
@@ -92,6 +95,7 @@ private:
     // int obj3;
     // int angle1;
     // int angle2;
+    individual_config::funcType function;
     int t;
         
 private:

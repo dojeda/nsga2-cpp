@@ -26,6 +26,7 @@ NSGA2::NSGA2() :
     nbits(0),
     limits_realvar(0),
     limits_binvar(0),
+    function(0),
     // choice(0),
     // obj1(0),
     // obj2(0),
@@ -60,7 +61,8 @@ NSGA2::~NSGA2() {
 
 void NSGA2::initialize() throw (nsga2exception) {
 
-    cout << "Initializing NSGA-II. Checking configuration" << endl;
+    cout << "Initializing NSGA-II v0.1.\n"
+         << "Checking configuration" << endl;
     
     if (nreal < 0)
         throw nsga2exception("Invalid number of real variables");
@@ -94,7 +96,8 @@ void NSGA2::initialize() throw (nsga2exception) {
         throw nsga2exception("Invalid number of real variable limits");
     if (limits_binvar.size() != nbin)
         throw nsga2exception("Invalid number of binary variable limits");
-
+    if (function == 0)
+        throw nsga2exception("Evaluation function not defined");
 
     init_streams();
     report_parameters(fpt5);
@@ -115,7 +118,8 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 nobj,
                                 pmut_real,
                                 pmut_bin,
-                                eta_m);
+                                eta_m,
+                                function);
     child_pop  = new population(popsize,
                                 nreal,
                                 nbin,
@@ -126,7 +130,8 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 nobj,
                                 pmut_real,
                                 pmut_bin,
-                                eta_m);
+                                eta_m,
+                                function);
     mixed_pop  = new population(popsize*2,
                                 nreal,
                                 nbin,
@@ -137,7 +142,8 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 nobj,
                                 pmut_real,
                                 pmut_bin,
-                                eta_m);
+                                eta_m,
+                                function);
 
     randomize();
     parent_pop->initialize();

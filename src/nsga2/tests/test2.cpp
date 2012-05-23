@@ -7,9 +7,19 @@
 #include <numeric>
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 
 using namespace std;
 
+void test_problem1 (double *xreal,
+                   double *xbin,
+                   int **gene,
+                   double *obj,
+                   double *constr) {
+    obj[0] = pow(xreal[0],2.0);
+    obj[1] = pow((xreal[0]-2.0),2.0);
+    return;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -345,6 +355,7 @@ int main(int argc, char *argv[]) {
     nsga2.set_nbits(nbits);
     nsga2.set_limits_realvar(limits_realvar);
     nsga2.set_limits_binvar(limits_binvar);
+    nsga2.set_function(&test_problem1);
 
     nsga2.initialize();
     nsga2.evolve();
