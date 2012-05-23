@@ -10,6 +10,8 @@
 
 namespace nsga2 {
 
+class NSGA2;
+
 struct individual_config {
     int nreal;
     int nbin;
@@ -36,6 +38,8 @@ struct individual {
     individual(const individual_config& c) throw (nsga2::nsga2exception);
     virtual ~individual();
 
+    // individual& operator=(const individual& ind);
+    
     void initialize() throw (nsga2::nsga2exception);
 
     void decode();
@@ -58,7 +62,7 @@ struct individual {
 private:
     const individual_config* config;
     friend std::ostream& operator<< (std::ostream& os, const individual& ind);
-
+    friend class NSGA2;
 };
 
 std::ostream& operator<< (std::ostream& os, const individual& ind);
@@ -82,6 +86,10 @@ struct population {
     void fast_nds();
 
     void report(std::ostream& os) const;
+
+    int size() const {
+        return ind.size();
+    };
         
     std::vector<individual> ind;
 

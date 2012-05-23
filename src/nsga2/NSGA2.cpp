@@ -4,6 +4,7 @@
 #include <iostream>
 #include <numeric>
 #include <string>
+#include <algorithm>
 
 using namespace nsga2;
 using namespace std;
@@ -138,6 +139,8 @@ void NSGA2::initialize() throw (nsga2exception) {
     //parent_pop->assign_rank_and_crowding_distance();
     // assign_rank_and_crowding_distance (parent_pop);
 
+    selection(*parent_pop,*child_pop);
+    
     report_pop(*parent_pop,fpt1);
     
 }
@@ -225,3 +228,74 @@ void NSGA2::report_pop(const population& pop, std::ostream& os) const {
     
 }
 
+void NSGA2::selection(population& oldpop, population& newpop)
+    throw (nsga2::nsga2exception) {
+    const int N = oldpop.size();
+    if (newpop.size() != N)
+        throw nsga2::nsga2exception("Selection error: new and old pops don't have the same size");
+    
+    std::vector<int> a1(N), a2(N);
+    for (int i = 0; i < N; ++i) {
+        a1[i] = a2[i] = i;
+    }
+
+    int rand;
+    for (int i = 0; i < N; ++i) { // this could be done with a shuffle
+        rand = rnd(i,N-1);
+        std::swap(a1[rand],a1[i]);
+        rand = rnd(i,N-1);
+        std::swap(a2[rand],a2[i]);
+    }
+
+    for (int i = 0; i < N; i+=4) {
+        
+        individual& p11 = tournament(oldpop.ind[a1[i  ]], oldpop.ind[a1[i+1]]);
+        individual& p12 = tournament(oldpop.ind[a1[i+2]], oldpop.ind[a1[i+3]]);
+        crossover(p11,p12,newpop.ind[i  ],newpop.ind[i+1]);
+        
+        individual& p21 = tournament(oldpop.ind[a2[i  ]], oldpop.ind[a2[i+1]]);
+        individual& p22 = tournament(oldpop.ind[a2[i+2]], oldpop.ind[a2[i+3]]);
+        crossover(p21,p22,newpop.ind[i+2],newpop.ind[i+3]);
+    }
+
+    cout << "Bye" << endl;
+}
+
+individual& NSGA2::tournament(individual& ind1, individual& ind2) const {
+    int flag = ind1.check_dominance(ind2);
+    if (flag == 1) // ind1 dominates ind2
+        return ind1;
+    else if (flag == -1) // ind2 dominates ind1
+        return ind2;
+    else if (ind1.crowd_dist > ind2.crowd_dist)
+        return ind1;
+    else if (ind2.crowd_dist > ind1.crowd_dist)
+        return ind2;
+    else if (randomperc() <= 0.5)
+        return ind1;
+    else
+        return ind2;
+}
+
+void NSGA2::crossover(const individual& parent1, const individual& parent2,
+                      individual& child1, individual& child2) {
+
+    if (parent1.config->nreal)
+        realcross(parent1,parent2,child1,child2);
+    if (parent1.config->nbin)
+        bincross(parent1,parent2,child1,child2);
+    
+}
+
+void NSGA2::realcross(const individual& parent1, const individual& parent2,
+                      individual& child1, individual& child2) {
+
+    
+    
+}
+
+void NSGA2::bincross(const individual& parent1, const individual& parent2,
+                      individual& child1, individual& child2) {
+
+    
+}

@@ -46,7 +46,6 @@ individual::individual(const individual_config& c
     constr.resize(config->ncon,0);
 }
 
-
 individual::~individual() {
 }
 
