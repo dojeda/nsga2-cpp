@@ -6,6 +6,7 @@
 #include <vector>
 #include <numeric>
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <cmath>
 
@@ -22,17 +23,20 @@ void test_problem1 (double *xreal,
 }
 
 int main(int argc, char *argv[]) {
-
-    if (argc<2) {
-        cout << "Usage " << argv[0] << " random_seed" << endl;
+    
+    if (argc<3) {
+        cout << "Usage " << argv[0] << " random_seed input_file" << endl;
         return 1;
     }
+
     
     seed = atof(argv[1]);
     if (seed<=0.0 || seed>=1.0) {
         cout << "Entered seed value is wrong, seed value must be in (0,1)" << endl;
         return 1;
     }
+    
+    ifstream cin(argv[2]);
 
     // fpt1 = fopen("initial_pop.out","w");
     // fpt2 = fopen("final_pop.out","w");

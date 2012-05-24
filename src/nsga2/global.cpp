@@ -352,28 +352,41 @@ void population::fast_nds() {
     front.resize(1);
     front[0].clear();
     //std::vector< std::vector<int> >  F(1);
-    int i,j;
-    for (i = 0; i < ind.size(); ++i) {
+#pragma omp parallel for
+    for (int i = 0; i < ind.size(); ++i) {
+
+        std::vector<int> dom;
+        int dcount = 0;
         
         individual& p = ind[i];
-        p.dcounter  = 0;
-        p.dominated.clear();
+        // p.dcounter  = 0;
+        // p.dominated.clear();
 
-        for (j = 0; j < ind.size(); ++j) {
+        for (int j = 0; j < ind.size(); ++j) {
 
             individual& q = ind[j];
-            
+
             int compare = p.check_dominance(q);
             if (compare == 1) { // p dominates q
-                p.dominated.push_back(j);
+                //p.dominated.push_back(j);
+                dom.push_back(j);
             } else if (compare == -1) { // q dominates p
-                p.dcounter += 1;
+                //p.dcounter += 1;
+                dcount += 1;
             }
         }
 
-        if (p.dcounter == 0) {
-            p.rank = 1;
-            front[0].push_back(i);
+        #pragma omp critical
+        {
+            p.dcounter  = dcount;
+            p.dominated.clear();
+            p.dominated = dom;
+
+
+            if (p.dcounter == 0) {
+                p.rank = 1;
+                front[0].push_back(i);
+            }
         }
         
     }
@@ -383,11 +396,11 @@ void population::fast_nds() {
 
         std::vector<int>& fronti = front[fi-1];
         std::vector<int> Q;
-        for (i = 0; i < fronti.size(); ++i) {
+        for (int i = 0; i < fronti.size(); ++i) {
             
             individual& p = ind[fronti[i]];
             
-            for (j = 0; j < p.dominated.size() ; ++j) {
+            for (int j = 0; j < p.dominated.size() ; ++j) {
 
                 
                 individual& q = ind[p.dominated[j]];
