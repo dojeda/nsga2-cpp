@@ -333,12 +333,19 @@ void population::decode() {
 }
 
 void population::evaluate() {
+#ifdef USE_OPENMP
+#pragma omp parallel for
+    for (int i = 0; i < ind.size(); ++i) {
+        ind[i].evaluate();
+    }
+#else
     std::vector<individual>::iterator it;
     for (it  = ind.begin();
          it != ind.end();
          ++it) {
         it->evaluate();
     }
+#endif
 }
 
 void population::fast_nds() { 
@@ -435,7 +442,6 @@ void population::crowding_distance(int fronti) {
     const int limit = crowd_obj?ind_config.nobj:ind_config.nreal;
     for (int m = 0; m < limit; ++m) {
 
-        cout << "Sorting front of size " << F.size() << std::endl;
         std::sort(F.begin(), F.end(), comparator_obj(*this,m));
 
         // in the paper dist=INF for the first and last, in the code
