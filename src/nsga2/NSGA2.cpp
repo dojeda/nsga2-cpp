@@ -163,6 +163,10 @@ void NSGA2::initialize() throw (nsga2exception) {
     report_pop(*parent_pop,fpt1);
     fpt4 << "# gen = " << t << '\n';
     report_pop(*parent_pop,fpt4);
+
+    fpt1.flush();
+    fpt4.flush();
+    fpt5.flush();
     
 }
 
