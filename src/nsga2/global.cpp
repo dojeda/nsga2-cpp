@@ -407,9 +407,8 @@ struct comparator_obj {
     int m;
     bool operator() (int i, int j) {
         return pop.crowd_obj?
-            pop.ind[i].obj[m] <= pop.ind[j].obj[m]
-            :
-            pop.ind[i].xreal[m] <= pop.ind[j].xreal[m];
+              pop.ind[i].obj[m] <= pop.ind[j].obj[m]
+            : pop.ind[i].xreal[m] <= pop.ind[j].xreal[m];
     };
 };
 
@@ -435,7 +434,8 @@ void population::crowding_distance(int fronti) {
 
     const int limit = crowd_obj?ind_config.nobj:ind_config.nreal;
     for (int m = 0; m < limit; ++m) {
-        
+
+        cout << "Sorting front of size " << F.size() << std::endl;
         std::sort(F.begin(), F.end(), comparator_obj(*this,m));
 
         // in the paper dist=INF for the first and last, in the code
@@ -448,16 +448,16 @@ void population::crowding_distance(int fronti) {
             ind[F[l-1]].crowd_dist = INF;
         
         for (int i = 1; i < l-1; ++i) {
-            if (ind[F[i]].crowd_dist != INF &&
-                ind[F[l-1]].obj[m] != ind[F[0]].obj[m])
+            if (ind[F[i]].crowd_dist != INF)
+                if (crowd_obj && ind[F[l-1]].obj[m] != ind[F[0]].obj[m])
                 // ind[F[l-1]].xreal[m] != ind[F[0]].xreal[m])
-                ind[F[i]].crowd_dist +=
-                    crowd_obj?
-                    (ind[F[i+1]].obj[m] - ind[F[i-1]].obj[m]) // crowd over obj
-                    / (ind[F[l-1]].obj[m] - ind[F[0]].obj[m])
-                    :
-                    (ind[F[i+1]].xreal[m] - ind[F[i-1]].xreal[m]) // crowd over vars
-                    / (ind[F[l-1]].xreal[m] - ind[F[0]].xreal[m]);
+                    ind[F[i]].crowd_dist +=
+                        (ind[F[i+1]].obj[m] - ind[F[i-1]].obj[m]) // crowd over obj
+                        / (ind[F[l-1]].obj[m] - ind[F[0]].obj[m]);
+                else if (!crowd_obj && ind[F[l-1]].xreal[m] != ind[F[0]].xreal[m]) 
+                    ind[F[i]].crowd_dist +=
+                        (ind[F[i+1]].xreal[m] - ind[F[i-1]].xreal[m]) // crowd over vars
+                        / (ind[F[l-1]].xreal[m] - ind[F[0]].xreal[m]);
         }
     }
 
