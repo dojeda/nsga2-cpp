@@ -493,7 +493,8 @@ void NSGA2::advance() {
 
     t += 1;
     fpt4 << "# gen = " << t << '\n';
-    report_pop(*parent_pop,fpt4);    
+    report_pop(*parent_pop,fpt4);
+    fpt4.flush();
 
 }
 
