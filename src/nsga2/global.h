@@ -109,6 +109,8 @@ struct population {
     throw (nsga2::nsga2exception);
 
     void report(std::ostream& os) const;
+    void dump(std::ostream& os) const;
+    void load(std::istream& os);
 
     int size() const {
         return ind.size();

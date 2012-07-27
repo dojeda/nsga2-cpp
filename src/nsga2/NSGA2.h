@@ -7,6 +7,7 @@
 #include <utility>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 extern "C" {
     extern double seed;
@@ -107,11 +108,15 @@ private:
     // int angle2;
     individual_config::funcType function;
     int t;
+
+    std::string backupFilename;
         
 private:
     void init_streams();
     void report_parameters(std::ostream& os) const;
     void report_pop(const population& pop, std::ostream& os) const;
+    void save_backup() const;
+    bool load_backup();
 
     void selection(population& oldpop, population& newpop)
     throw (nsga2::nsga2exception) ;

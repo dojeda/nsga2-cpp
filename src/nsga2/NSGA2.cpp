@@ -6,6 +6,8 @@
 #include <string>
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
+#include <fstream>
 
 using namespace nsga2;
 using namespace std;
@@ -33,6 +35,7 @@ NSGA2::NSGA2() :
     // obj3(0),
     // angle1(0),
     // angle2(0),
+    backupFilename("nsga2_backup_pop.data"),
     nbinmut(0),
     nrealmut(0),
     nbincross(0),
@@ -151,15 +154,22 @@ void NSGA2::initialize() throw (nsga2exception) {
     mixed_pop->crowd_obj = crowd_obj;
 
     randomize();
-    parent_pop->initialize();
-    cout << "Initialization done, now performing first generation" << endl;
 
-    parent_pop->decode();
-    parent_pop->evaluate();
-    parent_pop->fast_nds();
-    parent_pop->crowding_distance_all();
+    bool fromBackup = load_backup();
+    if (!fromBackup) {
+        parent_pop->initialize();
+        cout << "Initialization done, now performing first generation" << endl;
 
-    t = 1;
+        parent_pop->decode();
+        parent_pop->evaluate();
+        parent_pop->fast_nds();
+        parent_pop->crowding_distance_all();
+        
+        t = 1;
+    } else {
+        cout << "Initialization made from backup file" << endl;
+    }
+
     report_pop(*parent_pop,fpt1);
     fpt4 << "# gen = " << t << '\n';
     report_pop(*parent_pop,fpt4);
@@ -249,6 +259,54 @@ void NSGA2::report_parameters(std::ostream& os) const {
 
 void NSGA2::report_pop(const population& pop, std::ostream& os) const {
     pop.report(os);
+}
+
+void NSGA2::save_backup() const {
+    cout << "Saving backup: ";
+    char tempfilename[L_tmpnam];
+    tmpnam(tempfilename);
+    cout << tempfilename << endl;
+    
+    ofstream ofs(tempfilename, ios::binary);
+
+    ofs.write(reinterpret_cast<const char*>(&t), sizeof(int));
+    ofs.write(reinterpret_cast<const char*>(&nbinmut), sizeof(int));
+    ofs.write(reinterpret_cast<const char*>(&nrealmut), sizeof(int));
+    ofs.write(reinterpret_cast<const char*>(&nbincross), sizeof(int));
+    ofs.write(reinterpret_cast<const char*>(&nrealcross), sizeof(int));
+    
+    parent_pop->dump(ofs);
+
+    ofs.flush();
+    ofs.close();
+
+    int result = rename(tempfilename, backupFilename.c_str());
+    if (result)
+        perror("Could not save backup!");
+    
+}
+
+bool NSGA2::load_backup() {
+    cout << "Loading backup: ";
+    
+    ifstream ifs(backupFilename.c_str(), ios::in | ios::binary);
+
+    if (!ifs.good()) {
+        cout << "Could not load backup file" << endl;
+        return false;
+    }
+
+    ifs.read(reinterpret_cast<char*>(&t),sizeof(int));
+    ifs.read(reinterpret_cast<char*>(&nbinmut),sizeof(int));
+    ifs.read(reinterpret_cast<char*>(&nrealmut),sizeof(int));
+    ifs.read(reinterpret_cast<char*>(&nbincross),sizeof(int));
+    ifs.read(reinterpret_cast<char*>(&nrealcross),sizeof(int));
+    
+    parent_pop->load(ifs);
+
+    ifs.close();
+
+    return true;
 }
 
 // void NSGA2::report_feasible(const population& pop, std::ostream& os) const {
@@ -447,13 +505,19 @@ void printme(const individual& ind) {
 void NSGA2::advance() {
 
     cout << "Advancing to generation " << t+1 << endl;
+
+    std::pair<int,int> res;
     
     // create next population Qt
     selection(*parent_pop,*child_pop);
-    child_pop->mutate();
+    res = child_pop->mutate();
     child_pop->decode();
     child_pop->evaluate();
 
+    // mutation book-keeping
+    nrealmut += res.first;
+    nbinmut  += res.second;
+    
     // fpt4 << "#Child pop\n";
     // report_pop(*child_pop,fpt4);
     
@@ -496,6 +560,9 @@ void NSGA2::advance() {
     report_pop(*parent_pop,fpt4);
     fpt4.flush();
 
+
+    // save a backup
+    save_backup();
 }
 
 void NSGA2::evolve() {

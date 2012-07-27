@@ -523,6 +523,72 @@ void population::report(std::ostream& os) const {
     }
 }
 
+void population::dump(std::ostream& os) const {
+    
+    std::vector<individual>::const_iterator it;
+    for (it  = ind.begin();
+         it != ind.end();
+         ++it) {
+        
+        if (ind_config.nobj > 0)
+            os.write(reinterpret_cast<const char*>(&(it->obj[0])),
+                     sizeof(double)*ind_config.nobj);
+
+        if (ind_config.ncon > 0)
+            os.write(reinterpret_cast<const char*>(&(it->constr[0])),
+                     sizeof(double)*ind_config.ncon);
+
+        if (ind_config.nreal > 0)
+            os.write(reinterpret_cast<const char*>(&(it->xreal[0])),
+                     sizeof(double)*ind_config.nreal);
+
+        for (int j = 0; j < ind_config.nbin; ++j)
+            os.write(reinterpret_cast<const char*>(&(it->gene[j][0])),
+                     sizeof(int)*ind_config.nbits[j]);
+
+        os.write(reinterpret_cast<const char*>(&(it->constr_violation)),
+                 sizeof(double));
+        os.write(reinterpret_cast<const char*>(&(it->rank)),
+                 sizeof(int));
+        os.write(reinterpret_cast<const char*>(&(it->crowd_dist)),
+                 sizeof(double));
+
+    }
+}
+
+void population::load(std::istream& os) {
+    
+    std::vector<individual>::iterator it;
+    for (it  = ind.begin();
+         it != ind.end();
+         ++it) {
+
+        if (ind_config.nobj > 0)
+            os.read(reinterpret_cast<char*>(&(it->obj[0])),
+                     sizeof(double)*ind_config.nobj);
+
+        if (ind_config.ncon > 0)
+            os.read(reinterpret_cast<char*>(&(it->constr[0])),
+                     sizeof(double)*ind_config.ncon);
+
+        if (ind_config.nreal > 0)
+            os.read(reinterpret_cast<char*>(&(it->xreal[0])),
+                     sizeof(double)*ind_config.nreal);
+
+        for (int j = 0; j < ind_config.nbin; ++j)
+            os.read(reinterpret_cast<char*>(&(it->gene[j][0])),
+                     sizeof(int)*ind_config.nbits[j]);
+
+        os.read(reinterpret_cast<char*>(&(it->constr_violation)),
+                 sizeof(double));
+        os.read(reinterpret_cast<char*>(&(it->rank)),
+                 sizeof(int));
+        os.read(reinterpret_cast<char*>(&(it->crowd_dist)),
+                 sizeof(double));
+
+    }
+}
+
 std::pair<int,int> population::mutate() {
     std::pair<int,int>
         num_mut = std::make_pair(0,0),
