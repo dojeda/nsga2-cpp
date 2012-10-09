@@ -1,7 +1,7 @@
 #include "nsga2/global.h"
 #include "rand.h"
 
-#include <cmath> 
+#include <cmath>
 #include <iostream>
 #include <algorithm>
 
@@ -34,7 +34,7 @@ individual::individual(const individual_config& c
     constr(0),
     crowd_dist(0),
     config(&c) {
-    
+
     xreal.resize(config->nreal,0);
     xbin.resize(config->nbin,0);
     gene.resize(config->nbin);
@@ -53,7 +53,7 @@ individual::~individual() {
 void individual::initialize() throw (nsga2::nsga2exception) {
     if (!config)
         throw nsga2::nsga2exception("Individual not configured");
-    
+
     for (int i = 0; i < config->nreal; ++i) {
         xreal[i] = rndreal(config->limits_realvar[i].first,
                            config->limits_realvar[i].second);
@@ -78,7 +78,7 @@ void individual::decode() {
             (double)sum*( config->limits_binvar[i].second - config->limits_binvar[i].first) / (double)((1 << (config->nbits[i]))-1); // TODO: check
     }
 }
- 
+
 void individual::evaluate() {
 
     // workaround to respect the signature of test_problem and its (int**)
@@ -86,15 +86,16 @@ void individual::evaluate() {
     for (unsigned i=0; i < gene.size(); ++i) {
         tmp[i] = &(gene[i][0]);
     }
-    
+
     (*config->function) (&xreal[0], &xbin[0], &tmp[0], &obj[0], &constr[0]);
-    
+
     if (config->ncon) {
-        for (int i = 0; i < config->ncon; ++i)
-            if (constr[i] < 0.0)
-                constr_violation += constr[i];
+      constr_violation = 0.0;
+      for (int i = 0; i < config->ncon; ++i)
+        if (constr[i] < 0.0)
+          constr_violation += constr[i];
     } else {
-        constr_violation = 0.0;
+      constr_violation = 0.0;
     }
 }
 
@@ -102,33 +103,33 @@ void individual::evaluate() {
 //          -1 if this > b (this is dominated by b),
 //           0 if they are nondominated
 int individual::check_dominance(const individual& b) const {
-    
+
     if (constr_violation < 0 && b.constr_violation < 0) {
         // both have constraint violations
-        
+
         if (constr_violation > b.constr_violation)
             return 1; // this violates less
         else if (constr_violation < b.constr_violation)
             return -1; // b violates less
         else
             return 0; // they both violate equally
-        
+
     } else if (constr_violation < 0 && b.constr_violation == 0) {
         // this violates and b doesn't => b dominates
-        
-        return -1; 
-        
+
+        return -1;
+
     } else if (constr_violation == 0 && b.constr_violation < 0) {
         // this doesn't violate and b does => this dominates
-        
-        return 1; 
-        
+
+        return 1;
+
     } else {
         // no constraint violations
-       
+
         int flag1 = 0, // to check if this has a smaller objective
             flag2 = 0; // to check if b    has a smaller objective
-        
+
         for (int i=0; i<config->nobj; ++i) {
             if (obj[i] < b.obj[i]) {
                 flag1 = 1;
@@ -136,23 +137,23 @@ int individual::check_dominance(const individual& b) const {
                 flag2 = 1;
             }
         }
-        
+
         if (flag1==1 && flag2==0) {
             // there is at least one smaller objective for this and none for b
-            
+
             return 1;
-            
+
         } else if (flag1==0 && flag2==1) {
             // there is at least one smaller objective for b and none for this
-            
+
             return -1;
-            
+
         } else {
             // no smaller objective or both have one smaller
-            
+
             return 0;
         }
-               
+
     }
 }
 
@@ -223,7 +224,7 @@ int individual::bin_mutate() {
 
 
 std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
-    
+
     os << "{Individual rank=" << ind.rank
        << "\nconstr_violation=" << ind.constr_violation;
 
@@ -234,7 +235,7 @@ std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
         if (it+1 != ind.xreal.end())
             os << ",";
     }
-    
+
     os << "]\ngene=";
     std::vector< std::vector<int> >::const_iterator it1;
     for (it1 = ind.gene.begin(); it1 != ind.gene.end(); ++it1) {
@@ -271,9 +272,9 @@ std::ostream& nsga2::operator<< (std::ostream& os, const individual& ind) {
     }
 
     os << "\ncrowd_dist=" << ind.crowd_dist;
- 
+
     os << " }";
-    
+
     return os;
 }
 
@@ -304,7 +305,7 @@ population::population(const int size,
     ind_config.pmut_bin       = pmut_bin;
     ind_config.eta_m          = eta_m;
     ind_config.function       = func;
-    
+
     for (int i = 0; i < size; ++i) {
         ind.push_back(individual(ind_config));
     }
@@ -348,7 +349,7 @@ void population::evaluate() {
 #endif
 }
 
-void population::fast_nds() { 
+void population::fast_nds() {
     front.resize(1);
     front[0].clear();
     //std::vector< std::vector<int> >  F(1);
@@ -357,7 +358,7 @@ void population::fast_nds() {
 
         std::vector<int> dom;
         int dcount = 0;
-        
+
         individual& p = ind[i];
         // p.dcounter  = 0;
         // p.dominated.clear();
@@ -388,7 +389,7 @@ void population::fast_nds() {
                 front[0].push_back(i);
             }
         }
-        
+
     }
 
     int fi = 1;
@@ -397,12 +398,12 @@ void population::fast_nds() {
         std::vector<int>& fronti = front[fi-1];
         std::vector<int> Q;
         for (int i = 0; i < fronti.size(); ++i) {
-            
+
             individual& p = ind[fronti[i]];
-            
+
             for (int j = 0; j < p.dominated.size() ; ++j) {
 
-                
+
                 individual& q = ind[p.dominated[j]];
                 q.dcounter -= 1;
 
@@ -412,12 +413,12 @@ void population::fast_nds() {
                 }
             }
         }
-        
+
 
         fi += 1;
         front.push_back(Q);
     }
-    
+
 }
 
 struct comparator_obj {
@@ -441,9 +442,9 @@ void population::crowding_distance(int fronti) {
 
     std::vector<int> F = front[fronti];
     if (F.size() == 0 ) return;
-    
+
     const int l = F.size();
-    
+
     for (int i = 0; i < l; ++i)
         ind[F[i]].crowd_dist = 0;
 
@@ -465,7 +466,7 @@ void population::crowding_distance(int fronti) {
         ind[F[0]].crowd_dist = INF;
         if (l > 1)
             ind[F[l-1]].crowd_dist = INF;
-        
+
         for (int i = 1; i < l-1; ++i) {
             if (ind[F[i]].crowd_dist != INF) {
                 if (crowd_obj && ind[F[l-1]].obj[m] != ind[F[0]].obj[m]) {
@@ -496,7 +497,7 @@ void population::merge(const population& pop1, const population& pop2)
 
     std::copy(pop1.ind.begin(), pop1.ind.end(), ind.begin());
     std::copy(pop2.ind.begin(), pop2.ind.end(), ind.begin() + pop1.size());
-    
+
 }
 
 void population::report(std::ostream& os) const {
@@ -510,26 +511,26 @@ void population::report(std::ostream& os) const {
             os << it->obj[j] << '\t';
         for (int j = 0; j < ind_config.ncon; ++j)
             os << it->constr[j] << '\t';
-        for (int j = 0; j < ind_config.nreal; ++j) 
+        for (int j = 0; j < ind_config.nreal; ++j)
             os << it->xreal[j] << '\t';
         for (int j = 0; j < ind_config.nbin; ++j)
-            for (int k = 0; k < ind_config.nbits[j]; ++k) 
+            for (int k = 0; k < ind_config.nbits[j]; ++k)
                 os << it->gene[j][k] << '\t';
 
         os << it->constr_violation << '\t'
            << it->rank << '\t'
            << it->crowd_dist << '\n';
-        
+
     }
 }
 
 void population::dump(std::ostream& os) const {
-    
+
     std::vector<individual>::const_iterator it;
     for (it  = ind.begin();
          it != ind.end();
          ++it) {
-        
+
         if (ind_config.nobj > 0)
             os.write(reinterpret_cast<const char*>(&(it->obj[0])),
                      sizeof(double)*ind_config.nobj);
@@ -557,7 +558,7 @@ void population::dump(std::ostream& os) const {
 }
 
 void population::load(std::istream& os) {
-    
+
     std::vector<individual>::iterator it;
     for (it  = ind.begin();
          it != ind.end();

@@ -19,7 +19,7 @@ class NSGA2 {
 public:
     NSGA2();
     virtual ~NSGA2();
-    
+
     void initialize() throw (nsga2exception);
     void advance();
     void evolve();
@@ -29,6 +29,9 @@ public:
     };
     void set_function(individual_config::funcType f) {
         this->function = f;
+    };
+    void set_popfunction(individual_config::popFuncType f) {
+        this->popFunction = f;
     };
     void set_crowdobj(bool crowd) {
         this->crowd_obj = crowd;
@@ -107,10 +110,11 @@ private:
     // int angle1;
     // int angle2;
     individual_config::funcType function;
+    individual_config::popFuncType popFunction;
     int t;
 
     std::string backupFilename;
-        
+
 private:
     void init_streams();
     void report_parameters(std::ostream& os) const;
@@ -127,7 +131,7 @@ private:
                    individual& child1, individual& child2);
     void bincross(const individual& parent1, const individual& parent2,
                    individual& child1, individual& child2);
-        
+
     int nbinmut;
     int nrealmut;
     int nbincross;
@@ -145,7 +149,7 @@ private:
     population* mixed_pop;
     bool crowd_obj;
 };
-    
+
 }
 
 #endif /* NSGA2_H_ */

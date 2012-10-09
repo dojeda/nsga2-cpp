@@ -29,6 +29,7 @@ NSGA2::NSGA2() :
     limits_realvar(0),
     limits_binvar(0),
     function(0),
+    popFunction(0),
     // choice(0),
     // obj1(0),
     // obj2(0),
@@ -67,7 +68,7 @@ void NSGA2::initialize() throw (nsga2exception) {
 
     cout << "Initializing NSGA-II v0.1.\n"
          << "Checking configuration" << endl;
-    
+
     if (nreal < 0)
         throw nsga2exception("Invalid number of real variables");
     if (nbin < 0)
@@ -76,7 +77,7 @@ void NSGA2::initialize() throw (nsga2exception) {
         throw nsga2exception("Zero real and binary variables");
     if (nobj < 1)
         throw nsga2exception("Invalid number of objective functions");
-    if (ncon < 0) 
+    if (ncon < 0)
         throw nsga2exception("Invalid number of constraints");
     if (popsize<4 || (popsize%4)!= 0)
         throw nsga2exception("Invalid size of population");
@@ -105,7 +106,7 @@ void NSGA2::initialize() throw (nsga2exception) {
 
     init_streams();
     report_parameters(fpt5);
-    
+
     nbinmut    = 0;
     nrealmut   = 0;
     nbincross  = 0;
@@ -164,7 +165,7 @@ void NSGA2::initialize() throw (nsga2exception) {
         parent_pop->evaluate();
         parent_pop->fast_nds();
         parent_pop->crowding_distance_all();
-        
+
         t = 1;
     } else {
         cout << "Initialization made from backup file" << endl;
@@ -177,7 +178,7 @@ void NSGA2::initialize() throw (nsga2exception) {
     fpt1.flush();
     fpt4.flush();
     fpt5.flush();
-    
+
 }
 
 void NSGA2::init_streams() {
@@ -240,7 +241,7 @@ void NSGA2::report_parameters(std::ostream& os) const {
         os << "\nDistribution index for crossover = " << eta_c;
         os << "\nDistribution index for mutation = " << eta_m;
     }
-    
+
     os << "\nNumber of binary variables = " << nbin;
     if (nbin != 0) {
         for (int i = 0; i<nbin; ++i) {
@@ -266,7 +267,7 @@ void NSGA2::save_backup() const {
     char tempfilename[L_tmpnam];
     tmpnam(tempfilename);
     cout << tempfilename << endl;
-    
+
     ofstream ofs(tempfilename, ios::binary);
 
     ofs.write(reinterpret_cast<const char*>(&t), sizeof(int));
@@ -274,7 +275,7 @@ void NSGA2::save_backup() const {
     ofs.write(reinterpret_cast<const char*>(&nrealmut), sizeof(int));
     ofs.write(reinterpret_cast<const char*>(&nbincross), sizeof(int));
     ofs.write(reinterpret_cast<const char*>(&nrealcross), sizeof(int));
-    
+
     parent_pop->dump(ofs);
 
     ofs.flush();
@@ -283,12 +284,12 @@ void NSGA2::save_backup() const {
     int result = rename(tempfilename, backupFilename.c_str());
     if (result)
         perror("Could not save backup!");
-    
+
 }
 
 bool NSGA2::load_backup() {
     cout << "Loading backup: ";
-    
+
     ifstream ifs(backupFilename.c_str(), ios::in | ios::binary);
 
     if (!ifs.good()) {
@@ -301,7 +302,7 @@ bool NSGA2::load_backup() {
     ifs.read(reinterpret_cast<char*>(&nrealmut),sizeof(int));
     ifs.read(reinterpret_cast<char*>(&nbincross),sizeof(int));
     ifs.read(reinterpret_cast<char*>(&nrealcross),sizeof(int));
-    
+
     parent_pop->load(ifs);
 
     ifs.close();
@@ -318,7 +319,7 @@ void NSGA2::selection(population& oldpop, population& newpop)
     const int N = oldpop.size();
     if (newpop.size() != N)
         throw nsga2::nsga2exception("Selection error: new and old pops don't have the same size");
-    
+
     std::vector<int> a1(N), a2(N);
     for (int i = 0; i < N; ++i) {
         a1[i] = a2[i] = i;
@@ -333,11 +334,11 @@ void NSGA2::selection(population& oldpop, population& newpop)
     }
 
     for (int i = 0; i < N; i+=4) {
-        
+
         individual& p11 = tournament(oldpop.ind[a1[i  ]], oldpop.ind[a1[i+1]]);
         individual& p12 = tournament(oldpop.ind[a1[i+2]], oldpop.ind[a1[i+3]]);
         crossover(p11,p12,newpop.ind[i  ],newpop.ind[i+1]);
-        
+
         individual& p21 = tournament(oldpop.ind[a2[i  ]], oldpop.ind[a2[i+1]]);
         individual& p22 = tournament(oldpop.ind[a2[i+2]], oldpop.ind[a2[i+3]]);
         crossover(p21,p22,newpop.ind[i+2],newpop.ind[i+3]);
@@ -368,7 +369,7 @@ void NSGA2::crossover(const individual& parent1, const individual& parent2,
         realcross(parent1,parent2,child1,child2);
     if (nbin)
         bincross(parent1,parent2,child1,child2);
-    
+
 }
 
 void NSGA2::realcross(const individual& parent1, const individual& parent2,
@@ -384,7 +385,7 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
         for (i=0; i<nreal; i++) {
             if (randomperc()<=0.5 ) {
                 if (fabs(parent1.xreal[i]-parent2.xreal[i]) > EPS) {
-                    
+
                     if (parent1.xreal[i] < parent2.xreal[i]) {
                         y1 = parent1.xreal[i];
                         y2 = parent2.xreal[i];
@@ -392,10 +393,10 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
                         y1 = parent2.xreal[i];
                         y2 = parent1.xreal[i];
                     }
-                    
+
                     yl = limits_realvar[i].first;
                     yu = limits_realvar[i].second;
-                    
+
                     rand = randomperc();
                     beta = 1.0 + (2.0*(y1-yl)/(y2-y1));
                     alpha = 2.0 - pow(beta,-(eta_c+1.0));
@@ -405,7 +406,7 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
                         betaq = pow ((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));
                     }
                     c1 = 0.5*((y1+y2)-betaq*(y2-y1));
-                    
+
                     beta = 1.0 + (2.0*(yu-y2)/(y2-y1));
                     alpha = 2.0 - pow(beta,-(eta_c+1.0));
                     if (rand <= (1.0/alpha)) {
@@ -414,10 +415,10 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
                         betaq = pow ((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));
                     }
                     c2 = 0.5*((y1+y2)+betaq*(y2-y1));
-                    
+
                     c1 = min(max(c1,yl),yu);
                     c2 = min(max(c2,yl),yu);
-                    
+
                     if (randomperc()<=0.5) {
                         child1.xreal[i] = c2;
                         child2.xreal[i] = c1;
@@ -440,7 +441,7 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
             child2.xreal[i] = parent2.xreal[i];
         }
     }
-    
+
 }
 
 void NSGA2::bincross(const individual& parent1, const individual& parent2,
@@ -480,7 +481,7 @@ void NSGA2::bincross(const individual& parent1, const individual& parent2,
             }
         }
     }
-    
+
 }
 
 struct sort_n {
@@ -507,7 +508,7 @@ void NSGA2::advance() {
     cout << "Advancing to generation " << t+1 << endl;
 
     std::pair<int,int> res;
-    
+
     // create next population Qt
     selection(*parent_pop,*child_pop);
     res = child_pop->mutate();
@@ -517,22 +518,22 @@ void NSGA2::advance() {
     // mutation book-keeping
     nrealmut += res.first;
     nbinmut  += res.second;
-    
+
     // fpt4 << "#Child pop\n";
     // report_pop(*child_pop,fpt4);
-    
+
     // create population Rt = Pt U Qt
     mixed_pop->merge(*parent_pop,*child_pop);
 
     // fpt4 << "#Mixed\n";
     // report_pop(*mixed_pop, fpt4);
-    
+
     mixed_pop->fast_nds();
     //mixed_pop->crowding_distance_all();
 
     // fpt4 << "#Mixed nfs\n";
     // report_pop(*mixed_pop, fpt4);
-        
+
 
     // Pt+1 = empty
     parent_pop->ind.clear();
@@ -540,7 +541,7 @@ void NSGA2::advance() {
     int i = 0;
     // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
     while (parent_pop->size() + mixed_pop->front[i].size() < popsize) {
-        std::vector<int>& Fi = mixed_pop->front[i]; 
+        std::vector<int>& Fi = mixed_pop->front[i];
         mixed_pop->crowding_distance(i);           // calculate crowding in Fi
         for (int j = 0; j < Fi.size(); ++j)        // Pt+1 = Pt+1 U Fi
             parent_pop->ind.push_back(mixed_pop->ind[Fi[j]]);
@@ -553,20 +554,24 @@ void NSGA2::advance() {
 
     const int extra = popsize - parent_pop->size();
     for (int j = 0; j < extra; ++j) // Pt+1 = Pt+1 U Fi[1:N-|Pt+1|]
-        parent_pop->ind.push_back(mixed_pop->ind[mixed_pop->front[i][j]]);        
+        parent_pop->ind.push_back(mixed_pop->ind[mixed_pop->front[i][j]]);
 
     t += 1;
+
+    if (popFunction) {
+      (*popFunction)(*parent_pop);
+    }
+
     fpt4 << "# gen = " << t << '\n';
     report_pop(*parent_pop,fpt4);
     fpt4.flush();
-
 
     // save a backup
     save_backup();
 }
 
 void NSGA2::evolve() {
-    while (t < ngen)
-        advance();
-    report_pop(*parent_pop,fpt2);
+  while (t < ngen)
+    advance();
+  report_pop(*parent_pop,fpt2);
 }

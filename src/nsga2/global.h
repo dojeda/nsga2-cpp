@@ -14,6 +14,7 @@
 namespace nsga2 {
 
 class NSGA2;
+ struct population;
 
 struct individual_config {
 
@@ -22,7 +23,8 @@ struct individual_config {
                              int **,
                              double *,
                              double *);
-    
+    typedef void (*popFuncType)(population&);
+
     int nreal;
     int nbin;
     int nobj;
@@ -40,16 +42,16 @@ struct individual_config {
     std::vector< std::pair<double,double> > limits_binvar;
     funcType function;
 };
-    
+
 struct individual {
 
     individual() throw (); // needed for std::vector<individual> allocator
-        
+
     individual(const individual_config& c) throw (nsga2::nsga2exception);
     virtual ~individual();
 
     // individual& operator=(const individual& ind);
-    
+
     void initialize() throw (nsga2::nsga2exception);
 
     void decode();
@@ -59,7 +61,7 @@ struct individual {
     int bin_mutate();
 
     int check_dominance(const individual& b) const;
-    
+
     int rank;
     double constr_violation;
     std::vector<double> xreal;
@@ -80,7 +82,7 @@ private:
 std::ostream& operator<< (std::ostream& os, const individual& ind);
 
 struct population {
-        
+
     population(const int size,
                const int nreal,
                const int nbin,
@@ -103,7 +105,7 @@ struct population {
     void fast_nds();
     void crowding_distance_all();
     void crowding_distance(int fronti);
-    
+
     std::pair<int,int> mutate();
     void merge(const population& pop1, const population& pop2)
     throw (nsga2::nsga2exception);
@@ -115,12 +117,12 @@ struct population {
     int size() const {
         return ind.size();
     };
-        
+
     std::vector<individual> ind;
     std::vector< std::vector<int > > front;
 
     bool crowd_obj; // true: crowding over objective (default) false: crowding over real vars
-    
+
 private:
     individual_config ind_config;
     friend std::ostream& operator<< (std::ostream& os, const population& pop);
