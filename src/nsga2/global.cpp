@@ -1,5 +1,5 @@
 #include "nsga2/global.h"
-#include "rand.h"
+//#include "rand.h"
 
 #include <cmath>
 #include <iostream>
@@ -7,6 +7,8 @@
 
 using namespace nsga2;
 using namespace std;
+
+extern random_gen rgen; // global common random generator
 
 individual::individual() throw () :
     rank(0),
@@ -55,13 +57,13 @@ void individual::initialize() throw (nsga2::nsga2exception) {
         throw nsga2::nsga2exception("Individual not configured");
 
     for (int i = 0; i < config->nreal; ++i) {
-        xreal[i] = rndreal(config->limits_realvar[i].first,
-                           config->limits_realvar[i].second);
+        xreal[i] = rgen.real(config->limits_realvar[i].first,
+			     config->limits_realvar[i].second);
     }
 
     for (int i = 0; i < config->nbin; ++i) {
         for (int j = 0; j < config->nbits[i]; ++j) {
-            gene[i][j] = randomperc() <= 0.5 ? 0 : 1;
+            gene[i][j] = rgen.realu() <= 0.5 ? 0 : 1;
         }
     }
 }
@@ -173,13 +175,13 @@ int individual::real_mutate() {
     double y, yl, yu, val, xy;
     int num_mut = 0;
     for (j=0; j<config->nreal; j++) {
-        if (randomperc() <= config->pmut_real) {
+        if (rgen.realu() <= config->pmut_real) {
             y = xreal[j];
             yl = config->limits_realvar[j].first;
             yu = config->limits_realvar[j].second;
             delta1 = (y-yl)/(yu-yl);
             delta2 = (yu-y)/(yu-yl);
-            rnd = randomperc();
+            rnd = rgen.realu();
             mut_pow = 1.0/(config->eta_m+1.0);
             if (rnd <= 0.5) {
                 xy = 1.0-delta1;
@@ -208,7 +210,7 @@ int individual::bin_mutate() {
     int num_mut = 0;
     for (j=0; j<config->nbin; j++) {
         for (k=0; k<config->nbits[j]; k++) {
-            prob = randomperc();
+            prob = rgen.realu();
             if (prob <=config->pmut_bin) {
                 if (gene[j][k] == 0) {
                     gene[j][k] = 1;

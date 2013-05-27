@@ -12,6 +12,8 @@
 
 using namespace std;
 
+extern nsga2::random_gen rgen; // global common random generator
+
 void test_problem1 (double *xreal,
                    double *xbin,
                    int **gene,
@@ -30,11 +32,12 @@ int main(int argc, char *argv[]) {
     }
 
     
-    seed = atof(argv[1]);
-    if (seed<=0.0 || seed>=1.0) {
-        cout << "Entered seed value is wrong, seed value must be in (0,1)" << endl;
-        return 1;
-    }
+    int seed = atoi(argv[1]);
+    rgen.set_seed(seed);
+    // if (seed<=0.0 || seed>=1.0) {
+    //     cout << "Entered seed value is wrong, seed value must be in (0,1)" << endl;
+    //     return 1;
+    // }
     
     ifstream cin(argv[2]);
 

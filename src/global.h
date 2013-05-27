@@ -24,7 +24,7 @@ typedef struct
     double *constr;
     double crowd_dist;
 }
-individual; // DONE
+    individual; // DONE
      
 typedef struct
 {

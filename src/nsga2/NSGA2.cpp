@@ -1,5 +1,5 @@
 #include "nsga2/NSGA2.h"
-#include "rand.h"
+//#include "rand.h"
 
 #include <iostream>
 #include <numeric>
@@ -154,7 +154,7 @@ void NSGA2::initialize() throw (nsga2exception) {
     child_pop->crowd_obj = crowd_obj;
     mixed_pop->crowd_obj = crowd_obj;
 
-    randomize();
+    //randomize();
 
     bool fromBackup = load_backup();
     if (!fromBackup) {
@@ -255,7 +255,7 @@ void NSGA2::report_parameters(std::ostream& os) const {
         os << "Probability of crossover of binary variable = " << pcross_bin;
         os << "Probability of mutation of binary variable = " << pmut_bin;
     }
-    os << "\nSeed for random number generator = " << seed << endl;
+    os << "\nSeed for random number generator = " << rgen.get_seed() << endl;
 }
 
 void NSGA2::report_pop(const population& pop, std::ostream& os) const {
@@ -327,9 +327,9 @@ void NSGA2::selection(population& oldpop, population& newpop)
 
     int rand;
     for (int i = 0; i < N; ++i) { // this could be done with a shuffle
-        rand = rnd(i,N-1);
+        rand = rgen.integer(i,N-1);
         std::swap(a1[rand],a1[i]);
-        rand = rnd(i,N-1);
+        rand = rgen.integer(i,N-1);
         std::swap(a2[rand],a2[i]);
     }
 
@@ -356,7 +356,7 @@ individual& NSGA2::tournament(individual& ind1, individual& ind2) const {
         return ind1;
     else if (ind2.crowd_dist > ind1.crowd_dist)
         return ind2;
-    else if (randomperc() <= 0.5)
+    else if (rgen.realu() <= 0.5)
         return ind1;
     else
         return ind2;
@@ -380,10 +380,10 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
     double y1, y2, yl, yu;
     double c1, c2;
     double alpha, beta, betaq;
-    if (randomperc() <= pcross_real) {
+    if (rgen.realu() <= pcross_real) {
         nrealcross++;
         for (i=0; i<nreal; i++) {
-            if (randomperc()<=0.5 ) {
+            if (rgen.realu()<=0.5 ) {
                 if (fabs(parent1.xreal[i]-parent2.xreal[i]) > EPS) {
 
                     if (parent1.xreal[i] < parent2.xreal[i]) {
@@ -397,7 +397,7 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
                     yl = limits_realvar[i].first;
                     yu = limits_realvar[i].second;
 
-                    rand = randomperc();
+                    rand = rgen.realu();
                     beta = 1.0 + (2.0*(y1-yl)/(y2-y1));
                     alpha = 2.0 - pow(beta,-(eta_c+1.0));
                     if (rand <= (1.0/alpha)) {
@@ -419,7 +419,7 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
                     c1 = min(max(c1,yl),yu);
                     c2 = min(max(c2,yl),yu);
 
-                    if (randomperc()<=0.5) {
+                    if (rgen.realu()<=0.5) {
                         child1.xreal[i] = c2;
                         child2.xreal[i] = c1;
                     } else {
@@ -452,11 +452,11 @@ void NSGA2::bincross(const individual& parent1, const individual& parent2,
     double rand;
     int temp, site1, site2;
     for (i=0; i<nbin; i++) {
-        rand = randomperc();
+        rand = rgen.realu();
         if (rand <= pcross_bin) {
             nbincross++;
-            site1 = rnd(0,nbits[i]-1);
-            site2 = rnd(0,nbits[i]-1);
+            site1 = rgen.integer(0,nbits[i]-1);
+            site2 = rgen.integer(0,nbits[i]-1);
             if (site1 > site2) {
                 temp = site1;
                 site1 = site2;

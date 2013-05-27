@@ -2,6 +2,7 @@
 #define NSGA2_H_
 
 #include <nsga2/global.h>
+#include <nsga2/random.h>
 
 #include <vector>
 #include <utility>
@@ -9,9 +10,11 @@
 #include <fstream>
 #include <string>
 
-extern "C" {
-    extern double seed;
-}
+// extern "C" {
+//     //extern double seed;
+//     int seed;
+// }
+extern nsga2::random_gen rgen; // global common random generator
 
 namespace nsga2 {
 
@@ -24,8 +27,9 @@ public:
     void advance();
     void evolve();
 
-    void set_seed(double s) {
-        seed = s;
+    void set_seed(int s) {
+        //seed = s;
+	rgen.set_seed(s);
     };
     void set_function(individual_config::funcType f) {
         this->function = f;

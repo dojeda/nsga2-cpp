@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     
     nsga2::individual ind(conf);
 
-    randomize();
+    //randomize();
     ind.initialize();
     
     cout << "Individual: " << ind << endl;

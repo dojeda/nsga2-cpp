@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "nsga2/exception.h"
+#include "nsga2/random.h"
 
 #define EPS 1e-14
 #define INF 1e+14
