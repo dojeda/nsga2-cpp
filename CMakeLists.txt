@@ -58,7 +58,9 @@ foreach(HEADER ${NSGA2_HEADER_FILES})
     DESTINATION include/${DIR2} COMPONENT headers)
 endforeach(HEADER)
 
-install(TARGETS nsga2
+install(TARGETS nsga2 nsga2-static
       RUNTIME DESTINATION bin COMPONENT libraries
       LIBRARY DESTINATION lib COMPONENT libraries
       ARCHIVE DESTINATION lib/static COMPONENT libraries)
+
+
