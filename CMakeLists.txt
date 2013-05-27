@@ -35,6 +35,9 @@ include_directories(src)
 add_library(nsga2 SHARED
   ${NSGA2_SOURCE_FILES})
 
+add_library(nsga2-static STATIC
+  ${NSGA2_SOURCE_FILES})
+
 # add_executable(test1
 #   src/nsga2/tests/test1.cpp)
 # target_link_libraries(test1 nsga2)
