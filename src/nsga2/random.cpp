@@ -1,6 +1,6 @@
 #include "nsga2/random.h"
 
-#include <iostream>
+//#include <iostream>
 
 using namespace nsga2;
 
@@ -25,8 +25,8 @@ double random_gen::real(double low, double high) {
 int random_gen::integer(int low,       int high) { 
     uintd.param(boost::random::uniform_int_distribution<int>::param_type(low,high));
     int r = uintd(gen);
-    std::cout << "Random integer between " << low
-	      << " and " << high << ": " << r << std::endl;
+    // std::cout << "Random integer between " << low
+    // 	      << " and " << high << ": " << r << std::endl;
     return r;
 }
 
