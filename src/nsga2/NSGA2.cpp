@@ -150,6 +150,12 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 eta_m,
                                 function);
 
+    if (popFunction) {
+	parent_pop->set_popfunction(popFunction);
+	child_pop->set_popfunction(popFunction);
+	mixed_pop->set_popfunction(popFunction);
+    }
+
     parent_pop->crowd_obj = crowd_obj;
     child_pop->crowd_obj = crowd_obj;
     mixed_pop->crowd_obj = crowd_obj;
@@ -162,7 +168,7 @@ void NSGA2::initialize() throw (nsga2exception) {
         cout << "Initialization done, now performing first generation" << endl;
 
         parent_pop->decode();
-        parent_pop->evaluate();
+        parent_pop->custom_evaluate();
         parent_pop->fast_nds();
         parent_pop->crowding_distance_all();
 
@@ -265,7 +271,11 @@ void NSGA2::report_pop(const population& pop, std::ostream& os) const {
 void NSGA2::save_backup() const {
     cout << "Saving backup: ";
     char tempfilename[L_tmpnam];
-    tmpnam(tempfilename);
+    char* res = tmpnam(tempfilename);
+    if (!res) {
+	perror("Could not create temporary file!");
+	return;
+    }
     cout << tempfilename << endl;
 
     ofstream ofs(tempfilename, ios::binary);
@@ -513,7 +523,7 @@ void NSGA2::advance() {
     selection(*parent_pop,*child_pop);
     res = child_pop->mutate();
     child_pop->decode();
-    child_pop->evaluate();
+    child_pop->custom_evaluate();
 
     // mutation book-keeping
     nrealmut += res.first;
@@ -558,9 +568,9 @@ void NSGA2::advance() {
 
     t += 1;
 
-    if (popFunction) {
-      (*popFunction)(*parent_pop);
-    }
+    // if (popFunction) {
+    //   (*popFunction)(*parent_pop);
+    // }
 
     fpt4 << "# gen = " << t << '\n';
     report_pop(*parent_pop,fpt4);

@@ -292,9 +292,10 @@ population::population(const int size,
                        const double pmut_bin,
                        const double eta_m,
                        const individual_config::funcType func)
-    throw (nsga2::nsga2exception) :
-    crowd_obj(true),
-    ind_config() {
+	  throw (nsga2::nsga2exception) :
+	  crowd_obj(true),
+	  ind_config(),
+	  eval_pop_function(NULL) {
 
     ind_config.nreal          = nreal;
     ind_config.nbin           = nbin;
@@ -336,19 +337,38 @@ void population::decode() {
 }
 
 void population::evaluate() {
-#ifdef USE_OPENMP
-#pragma omp parallel for
-    for (int i = 0; i < ind.size(); ++i) {
-        ind[i].evaluate();
-    }
-#else
+    normal_evaluate_openmp();
+}
+
+void population::custom_evaluate() {
+    if (eval_pop_function != NULL)
+	(*eval_pop_function)(*this);
+    else 
+	normal_evaluate_openmp();
+}
+
+void population::normal_evaluate() {
     std::vector<individual>::iterator it;
     for (it  = ind.begin();
          it != ind.end();
          ++it) {
         it->evaluate();
     }
+}
+
+void population::normal_evaluate_openmp() {
+#ifdef USE_OPENMP
+#pragma omp parallel for
+    for (int i = 0; i < ind.size(); ++i) {
+        ind[i].evaluate();
+    }
+#else
+    normal_evaluate();
 #endif
+}
+
+void population::set_popfunction(individual_config::popFuncType f) {
+    eval_pop_function = f;
 }
 
 void population::fast_nds() {
