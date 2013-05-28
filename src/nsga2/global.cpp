@@ -300,7 +300,7 @@ population::population(const int size,
 	  ind_config(),
 	  eval_pop_function(NULL) {
 
-    generation = 0;
+    generation = 1;
     ind_config.nreal          = nreal;
     ind_config.nbin           = nbin;
     ind_config.nobj           = nobj;
