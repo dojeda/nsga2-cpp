@@ -74,6 +74,7 @@ struct individual {
 
     int dcounter; // domination counter n_p
     std::vector<int> dominated;
+    bool evaluated;
 
 private:
     const individual_config* config;
@@ -103,6 +104,8 @@ struct population {
 
     void decode();
     void evaluate();
+    void custom_evaluate(); // this one takes into account custom evaluation by user
+    void set_popfunction(individual_config::popFuncType f);
     void fast_nds();
     void crowding_distance_all();
     void crowding_distance(int fronti);
@@ -123,9 +126,16 @@ struct population {
     std::vector< std::vector<int > > front;
 
     bool crowd_obj; // true: crowding over objective (default) false: crowding over real vars
+    int generation;
 
 private:
     individual_config ind_config;
+    individual_config::popFuncType eval_pop_function;
+
+    void normal_evaluate();
+    void normal_evaluate_openmp();
+
+
     friend std::ostream& operator<< (std::ostream& os, const population& pop);
 };
 

@@ -35,6 +35,7 @@ individual::individual(const individual_config& c
     obj(0),
     constr(0),
     crowd_dist(0),
+    evaluated(false),
     config(&c) {
 
     xreal.resize(config->nreal,0);
@@ -99,6 +100,8 @@ void individual::evaluate() {
     } else {
       constr_violation = 0.0;
     }
+
+    evaluated = true;
 }
 
 // returns:  1 if this < b (this dominates b),
@@ -292,10 +295,12 @@ population::population(const int size,
                        const double pmut_bin,
                        const double eta_m,
                        const individual_config::funcType func)
-    throw (nsga2::nsga2exception) :
-    crowd_obj(true),
-    ind_config() {
+	  throw (nsga2::nsga2exception) :
+	  crowd_obj(true),
+	  ind_config(),
+	  eval_pop_function(NULL) {
 
+    generation = 1;
     ind_config.nreal          = nreal;
     ind_config.nbin           = nbin;
     ind_config.nobj           = nobj;
@@ -336,19 +341,38 @@ void population::decode() {
 }
 
 void population::evaluate() {
-#ifdef USE_OPENMP
-#pragma omp parallel for
-    for (int i = 0; i < ind.size(); ++i) {
-        ind[i].evaluate();
-    }
-#else
+    normal_evaluate_openmp();
+}
+
+void population::custom_evaluate() {
+    if (eval_pop_function != NULL)
+	(*eval_pop_function)(*this);
+    else 
+	normal_evaluate_openmp();
+}
+
+void population::normal_evaluate() {
     std::vector<individual>::iterator it;
     for (it  = ind.begin();
          it != ind.end();
          ++it) {
         it->evaluate();
     }
+}
+
+void population::normal_evaluate_openmp() {
+#ifdef USE_OPENMP
+#pragma omp parallel for
+    for (int i = 0; i < ind.size(); ++i) {
+        ind[i].evaluate();
+    }
+#else
+    normal_evaluate();
 #endif
+}
+
+void population::set_popfunction(individual_config::popFuncType f) {
+    eval_pop_function = f;
 }
 
 void population::fast_nds() {

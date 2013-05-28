@@ -58,6 +58,9 @@ public:
     void set_ngen(int ngen) {
         this->ngen = ngen;
     };
+    void set_nreport(int nrep) {
+	this->nreport = nrep;
+    };
     void set_pcross_real(double pcross_real) {
         this->pcross_real = pcross_real;
     };
@@ -94,6 +97,7 @@ private:
     int ncon;
     int popsize;
     int ngen;
+    int nreport;
     double pcross_real;
     double pcross_bin;
     double pmut_real;

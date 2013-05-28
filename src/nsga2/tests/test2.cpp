@@ -24,6 +24,11 @@ void test_problem1 (double *xreal,
     return;
 }
 
+void test_population(nsga2::population& pop) {
+    cout << "Evaluating population!" << endl;
+    pop.evaluate();
+}
+
 int main(int argc, char *argv[]) {
     
     if (argc<3) {
@@ -363,6 +368,7 @@ int main(int argc, char *argv[]) {
     nsga2.set_limits_realvar(limits_realvar);
     nsga2.set_limits_binvar(limits_binvar);
     nsga2.set_function(&test_problem1);
+    nsga2.set_popfunction(&test_population);
 
     nsga2.initialize();
     nsga2.evolve();
