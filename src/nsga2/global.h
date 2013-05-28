@@ -74,6 +74,7 @@ struct individual {
 
     int dcounter; // domination counter n_p
     std::vector<int> dominated;
+    bool evaluated;
 
 private:
     const individual_config* config;
@@ -125,6 +126,7 @@ struct population {
     std::vector< std::vector<int > > front;
 
     bool crowd_obj; // true: crowding over objective (default) false: crowding over real vars
+    int generation;
 
 private:
     individual_config ind_config;

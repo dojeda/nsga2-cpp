@@ -19,6 +19,7 @@ NSGA2::NSGA2() :
     ncon(-1),
     popsize(-1),
     ngen(-1),
+    nreport(1),
     pcross_real(-1),
     pcross_bin(-1),
     pmut_real(-1),
@@ -380,6 +381,9 @@ void NSGA2::crossover(const individual& parent1, const individual& parent2,
     if (nbin)
         bincross(parent1,parent2,child1,child2);
 
+    child1.evaluated = false;
+    child2.evaluated = false;
+
 }
 
 void NSGA2::realcross(const individual& parent1, const individual& parent2,
@@ -515,13 +519,14 @@ void printme(const individual& ind) {
 
 void NSGA2::advance() {
 
-    cout << "Advancing to generation " << t+1 << endl;
+    cout << "Advancing to generation " << t+1 << endl;  
 
     std::pair<int,int> res;
 
     // create next population Qt
     selection(*parent_pop,*child_pop);
     res = child_pop->mutate();
+    child_pop->generation = t+1;
     child_pop->decode();
     child_pop->custom_evaluate();
 
@@ -534,6 +539,7 @@ void NSGA2::advance() {
 
     // create population Rt = Pt U Qt
     mixed_pop->merge(*parent_pop,*child_pop);
+    mixed_pop->generation = t+1;
 
     // fpt4 << "#Mixed\n";
     // report_pop(*mixed_pop, fpt4);
@@ -572,9 +578,13 @@ void NSGA2::advance() {
     //   (*popFunction)(*parent_pop);
     // }
 
-    fpt4 << "# gen = " << t << '\n';
-    report_pop(*parent_pop,fpt4);
-    fpt4.flush();
+    parent_pop->generation = t;
+
+    if (t%nreport == 0) {
+	fpt4 << "# gen = " << t << '\n';
+	report_pop(*parent_pop,fpt4);
+	fpt4.flush();
+    }
 
     // save a backup
     save_backup();

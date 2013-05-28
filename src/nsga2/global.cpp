@@ -35,6 +35,7 @@ individual::individual(const individual_config& c
     obj(0),
     constr(0),
     crowd_dist(0),
+    evaluated(false),
     config(&c) {
 
     xreal.resize(config->nreal,0);
@@ -99,6 +100,8 @@ void individual::evaluate() {
     } else {
       constr_violation = 0.0;
     }
+
+    evaluated = true;
 }
 
 // returns:  1 if this < b (this dominates b),
@@ -297,6 +300,7 @@ population::population(const int size,
 	  ind_config(),
 	  eval_pop_function(NULL) {
 
+    generation = 0;
     ind_config.nreal          = nreal;
     ind_config.nbin           = nbin;
     ind_config.nobj           = nobj;
