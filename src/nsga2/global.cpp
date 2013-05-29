@@ -381,18 +381,18 @@ void population::fast_nds() {
     //std::vector< std::vector<int> >  F(1);
 #pragma omp parallel for
     for (int i = 0; i < ind.size(); ++i) {
-
+	
         std::vector<int> dom;
         int dcount = 0;
-
+	
         individual& p = ind[i];
         // p.dcounter  = 0;
         // p.dominated.clear();
-
+	
         for (int j = 0; j < ind.size(); ++j) {
-
+	    
             individual& q = ind[j];
-
+	    
             int compare = p.check_dominance(q);
             if (compare == 1) { // p dominates q
                 //p.dominated.push_back(j);
@@ -402,21 +402,26 @@ void population::fast_nds() {
                 dcount += 1;
             }
         }
-
-        #pragma omp critical
+	
+#pragma omp critical
         {
             p.dcounter  = dcount;
             p.dominated.clear();
             p.dominated = dom;
-
-
+	    
+	    
             if (p.dcounter == 0) {
                 p.rank = 1;
                 front[0].push_back(i);
             }
         }
-
+	
     }
+    
+    // using OpenMP can have different orders in the front[0]
+    // so let's sort it so that the algorithm is deterministic
+    // given a seed
+    std::sort(front[0].begin(), front[0].end());    
 
     int fi = 1;
     while (front[fi-1].size() > 0) {
