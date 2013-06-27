@@ -88,6 +88,12 @@ public:
     void set_limits_binvar(const std::vector< std::pair<double,double> >& limits_binvar) {
         this->limits_binvar = limits_binvar;
     };
+    void set_backup_filename(const std::string& filename) {
+	this->backupFilename = filename;
+    }
+    void set_custom_report_function(individual_config::popFuncType f) {
+	this->reportFunction = f;
+    }
 
 private:
     // Parameters to be defined by the user
@@ -119,11 +125,13 @@ private:
     // int angle2;
     individual_config::funcType function;
     individual_config::popFuncType popFunction;
+    individual_config::popFuncType reportFunction;
     int t;
 
     std::string backupFilename;
 
-private:
+  public:
+    //private:
     void init_streams();
     void report_parameters(std::ostream& os) const;
     void report_pop(const population& pop, std::ostream& os) const;
@@ -139,6 +147,8 @@ private:
                    individual& child1, individual& child2);
     void bincross(const individual& parent1, const individual& parent2,
                    individual& child1, individual& child2);
+
+    void custom_report(population& pop);
 
     int nbinmut;
     int nrealmut;
