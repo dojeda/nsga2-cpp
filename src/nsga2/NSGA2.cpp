@@ -69,7 +69,7 @@ NSGA2::~NSGA2() {
 
 void NSGA2::initialize() throw (nsga2exception) {
 
-    cout << "Initializing NSGA-II v0.2.\n"
+    cout << "Initializing NSGA-II v0.2.1\n"
          << "Checking configuration" << endl;
 
     if (nreal < 0)
