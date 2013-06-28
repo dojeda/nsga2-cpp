@@ -26,11 +26,13 @@ NSGA2::NSGA2() :
     pmut_bin(-1),
     eta_c(-1),
     eta_m(-1),
+    epsilon_c(EPS),
     nbits(0),
     limits_realvar(0),
     limits_binvar(0),
     function(0),
     popFunction(0),
+    reportFunction(0),
     // choice(0),
     // obj1(0),
     // obj2(0),
@@ -67,7 +69,7 @@ NSGA2::~NSGA2() {
 
 void NSGA2::initialize() throw (nsga2exception) {
 
-    cout << "Initializing NSGA-II v0.1.\n"
+    cout << "Initializing NSGA-II v0.2.1\n"
          << "Checking configuration" << endl;
 
     if (nreal < 0)
@@ -125,6 +127,7 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 pmut_real,
                                 pmut_bin,
                                 eta_m,
+				epsilon_c,
                                 function);
     child_pop  = new population(popsize,
                                 nreal,
@@ -137,6 +140,7 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 pmut_real,
                                 pmut_bin,
                                 eta_m,
+				epsilon_c,
                                 function);
     mixed_pop  = new population(popsize*2,
                                 nreal,
@@ -149,6 +153,7 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 pmut_real,
                                 pmut_bin,
                                 eta_m,
+				epsilon_c,
                                 function);
 
     if (popFunction) {
@@ -178,6 +183,8 @@ void NSGA2::initialize() throw (nsga2exception) {
         cout << "Initialization made from backup file" << endl;
     }
 
+    custom_report(*parent_pop);
+
     report_pop(*parent_pop,fpt1);
     fpt4 << "# gen = " << t << '\n';
     report_pop(*parent_pop,fpt4);
@@ -198,7 +205,7 @@ void NSGA2::init_streams() {
     fpt1.setf(ios::scientific);
     fpt2.setf(ios::scientific);
     fpt3.setf(ios::scientific);
-    fpt4.setf(ios::scientific);
+    fpt4.setf(ios::scientific); fpt4.precision(16);
     fpt5.setf(ios::scientific);
 
     fpt1 << "# This file contains the data of initial population\n";
@@ -271,6 +278,12 @@ void NSGA2::report_pop(const population& pop, std::ostream& os) const {
 
 void NSGA2::save_backup() const {
     cout << "Saving backup: ";
+    if (backupFilename == "") {
+	cout << "No backup file set" << endl;
+	return;
+    }
+
+
     char tempfilename[L_tmpnam];
     char* res = tmpnam(tempfilename);
     if (!res) {
@@ -300,6 +313,11 @@ void NSGA2::save_backup() const {
 
 bool NSGA2::load_backup() {
     cout << "Loading backup: ";
+    
+    if (backupFilename == "") {
+	cout << "No backup file set" << endl;
+	return false;
+    }
 
     ifstream ifs(backupFilename.c_str(), ios::in | ios::binary);
 
@@ -396,59 +414,61 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
     double alpha, beta, betaq;
     if (rgen.realu() <= pcross_real) {
         nrealcross++;
-        for (i=0; i<nreal; i++) {
-            if (rgen.realu()<=0.5 ) {
-                if (fabs(parent1.xreal[i]-parent2.xreal[i]) > EPS) {
+	for (i=0; i<nreal; i++) {
+	    //if (rgen.realu()<=0.5 ) { this is evil, in my opinion
 
-                    if (parent1.xreal[i] < parent2.xreal[i]) {
-                        y1 = parent1.xreal[i];
-                        y2 = parent2.xreal[i];
-                    } else {
-                        y1 = parent2.xreal[i];
-                        y2 = parent1.xreal[i];
-                    }
-
-                    yl = limits_realvar[i].first;
-                    yu = limits_realvar[i].second;
-
-                    rand = rgen.realu();
-                    beta = 1.0 + (2.0*(y1-yl)/(y2-y1));
-                    alpha = 2.0 - pow(beta,-(eta_c+1.0));
-                    if (rand <= (1.0/alpha)) {
-                        betaq = pow ((rand*alpha),(1.0/(eta_c+1.0)));
-                    } else {
-                        betaq = pow ((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));
-                    }
-                    c1 = 0.5*((y1+y2)-betaq*(y2-y1));
-
-                    beta = 1.0 + (2.0*(yu-y2)/(y2-y1));
-                    alpha = 2.0 - pow(beta,-(eta_c+1.0));
-                    if (rand <= (1.0/alpha)) {
-                        betaq = pow ((rand*alpha),(1.0/(eta_c+1.0)));
-                    } else {
-                        betaq = pow ((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));
-                    }
-                    c2 = 0.5*((y1+y2)+betaq*(y2-y1));
-
-                    c1 = min(max(c1,yl),yu);
-                    c2 = min(max(c2,yl),yu);
-
-                    if (rgen.realu()<=0.5) {
-                        child1.xreal[i] = c2;
-                        child2.xreal[i] = c1;
-                    } else {
-                        child1.xreal[i] = c1;
-                        child2.xreal[i] = c2;
-                    }
-                } else {
-                    child1.xreal[i] = parent1.xreal[i];
-                    child2.xreal[i] = parent2.xreal[i];
-                }
-            } else {
-                child1.xreal[i] = parent1.xreal[i];
-                child2.xreal[i] = parent2.xreal[i];
-            }
-        }
+	    if (fabs(parent1.xreal[i]-parent2.xreal[i]) > EPS) {
+		
+		if (parent1.xreal[i] < parent2.xreal[i]) {
+		    y1 = parent1.xreal[i];
+		    y2 = parent2.xreal[i];
+		} else {
+		    y1 = parent2.xreal[i];
+		    y2 = parent1.xreal[i];
+		}
+		
+		yl = limits_realvar[i].first;
+		yu = limits_realvar[i].second;
+		
+		rand = rgen.realu();
+		beta = 1.0 + (2.0*(y1-yl)/(y2-y1));
+		alpha = 2.0 - pow(beta,-(eta_c+1.0));
+		if (rand <= (1.0/alpha)) { // This is a contracting crossover
+		    betaq = pow ((rand*alpha),(1.0/(eta_c+1.0)));
+		} else {                   // This is an expanding crossover
+		    betaq = pow ((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));
+		}
+		c1 = 0.5*((y1+y2)-betaq*(y2-y1));
+		
+		beta = 1.0 + (2.0*(yu-y2)/(y2-y1));
+		alpha = 2.0 - pow(beta,-(eta_c+1.0));
+		if (rand <= (1.0/alpha)) { // This is a contracting crossover
+		    betaq = pow ((rand*alpha),(1.0/(eta_c+1.0)));
+		} else {                   // This is an expanding crossover
+		    betaq = pow ((1.0/(2.0 - rand*alpha)),(1.0/(eta_c+1.0)));
+		}
+		c2 = 0.5*((y1+y2)+betaq*(y2-y1));
+		
+		c1 = min(max(c1,yl),yu);
+		c2 = min(max(c2,yl),yu);
+		
+		if (rgen.realu()<=0.5) {
+		    child1.xreal[i] = c2;
+		    child2.xreal[i] = c1;
+		} else {
+		    child1.xreal[i] = c1;
+		    child2.xreal[i] = c2;
+		}
+	    } else {
+		child1.xreal[i] = parent1.xreal[i];
+		child2.xreal[i] = parent2.xreal[i];
+	    }
+	    // } else {
+	    //     // This is evil, in my opinion
+	    //     child1.xreal[i] = parent1.xreal[i];
+	    //     child2.xreal[i] = parent2.xreal[i];
+	    // }
+	}
     } else {
         for (i=0; i<nreal; i++) {
             child1.xreal[i] = parent1.xreal[i];
@@ -517,6 +537,11 @@ void printme(const individual& ind) {
     cout << ind << endl;
 }
 
+void NSGA2::custom_report(population& pop) {
+    if (reportFunction)
+	(*reportFunction)(pop);
+}
+
 void NSGA2::advance() {
 
     cout << "Advancing to generation " << t+1 << endl;  
@@ -564,6 +589,7 @@ void NSGA2::advance() {
         i += 1;
     }
 
+    mixed_pop->crowding_distance(i);           // calculate crowding in Fi
     std::sort(mixed_pop->front[i].begin(),
               mixed_pop->front[i].end(),
               sort_n(*mixed_pop) );// sort remaining front using <n
@@ -579,6 +605,7 @@ void NSGA2::advance() {
     // }
 
     parent_pop->generation = t;
+    custom_report(*parent_pop);
 
     if (t%nreport == 0) {
 	fpt4 << "# gen = " << t << '\n';
@@ -595,3 +622,4 @@ void NSGA2::evolve() {
     advance();
   report_pop(*parent_pop,fpt2);
 }
+

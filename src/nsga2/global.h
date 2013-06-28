@@ -42,6 +42,7 @@ struct individual_config {
     std::vector< std::pair<double,double> > limits_realvar;
     std::vector< std::pair<double,double> > limits_binvar;
     funcType function;
+    double epsilon_c;
 };
 
 struct individual {
@@ -96,6 +97,7 @@ struct population {
                const double pmut_real,
                const double pmut_bin,
                const double eta_m,
+	       const double epsilon_c,
                const individual_config::funcType func)
         throw (nsga2::nsga2exception);
     virtual ~population();
