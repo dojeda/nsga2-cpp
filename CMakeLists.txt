@@ -53,6 +53,10 @@ add_executable(test3
   src/nsga2/tests/test3.cpp)
 target_link_libraries(test3 nsga2)
 
+add_executable(test4
+  src/nsga2/tests/test4.cpp)
+target_link_libraries(test4 nsga2)
+
 foreach(HEADER ${NSGA2_HEADER_FILES})
   string(REGEX MATCH "(.*)[/\\]" DIR ${HEADER})
   #message(STATUS "dir is ${DIR}")

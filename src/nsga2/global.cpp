@@ -136,11 +136,19 @@ int individual::check_dominance(const individual& b) const {
             flag2 = 0; // to check if b    has a smaller objective
 
         for (int i=0; i<config->nobj; ++i) {
-            if (obj[i] < b.obj[i]) {
-                flag1 = 1;
-            } else if (obj[i] > b.obj[i]) {
-                flag2 = 1;
-            }
+	    if (config->nobj > 1) { // Normal multi objective comparison
+		if (obj[i] < b.obj[i]) {
+		    flag1 = 1;
+		} else if (obj[i] > b.obj[i]) {
+		    flag2 = 1;
+		}
+	    } else { // mono objective comparison with an epsilon
+		if (obj[i] < b.obj[i] && fabs(obj[i]-b.obj[i]) > config->epsilon_c) {
+		    flag1 = 1;
+		} else if (obj[i] > b.obj[i] && fabs(obj[i]-b.obj[i]) > config->epsilon_c) {
+		    flag2 = 1;
+		}
+	    }
         }
 
         if (flag1==1 && flag2==0) {
@@ -294,6 +302,7 @@ population::population(const int size,
                        const double pmut_real,
                        const double pmut_bin,
                        const double eta_m,
+		       const double epsilon_c,
                        const individual_config::funcType func)
 	  throw (nsga2::nsga2exception) :
 	  crowd_obj(true),
@@ -312,6 +321,7 @@ population::population(const int size,
     ind_config.pmut_bin       = pmut_bin;
     ind_config.eta_m          = eta_m;
     ind_config.function       = func;
+    ind_config.epsilon_c      = epsilon_c;
 
     for (int i = 0; i < size; ++i) {
         ind.push_back(individual(ind_config));
@@ -497,6 +507,8 @@ void population::crowding_distance(int fronti) {
         ind[F[0]].crowd_dist = INF;
         if (l > 1)
             ind[F[l-1]].crowd_dist = INF;
+	cout << "min " << ind[F[0]].xreal[0];
+	cout << "\tmax " << ind[F[l-1]].xreal[0] << endl;
 
         for (int i = 1; i < l-1; ++i) {
             if (ind[F[i]].crowd_dist != INF) {

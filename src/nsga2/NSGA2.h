@@ -79,6 +79,9 @@ public:
     void set_eta_m(double eta_m) {
         this->eta_m = eta_m;
     };
+    void set_epsilon_c(double epsi_c) {
+        this->epsilon_c = epsi_c;
+    };
     void set_nbits(const std::vector<int>& nbits) {
         this->nbits = nbits;
     };
@@ -110,6 +113,7 @@ private:
     double pmut_bin;
     double eta_c;
     double eta_m;
+    double epsilon_c;
     std::vector<int> nbits;
     std::vector< std::pair<double,double> > limits_realvar;
     // std::vector<double> min_realvar;

@@ -26,6 +26,7 @@ NSGA2::NSGA2() :
     pmut_bin(-1),
     eta_c(-1),
     eta_m(-1),
+    epsilon_c(EPS),
     nbits(0),
     limits_realvar(0),
     limits_binvar(0),
@@ -126,6 +127,7 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 pmut_real,
                                 pmut_bin,
                                 eta_m,
+				epsilon_c,
                                 function);
     child_pop  = new population(popsize,
                                 nreal,
@@ -138,6 +140,7 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 pmut_real,
                                 pmut_bin,
                                 eta_m,
+				epsilon_c,
                                 function);
     mixed_pop  = new population(popsize*2,
                                 nreal,
@@ -150,6 +153,7 @@ void NSGA2::initialize() throw (nsga2exception) {
                                 pmut_real,
                                 pmut_bin,
                                 eta_m,
+				epsilon_c,
                                 function);
 
     if (popFunction) {
@@ -201,7 +205,7 @@ void NSGA2::init_streams() {
     fpt1.setf(ios::scientific);
     fpt2.setf(ios::scientific);
     fpt3.setf(ios::scientific);
-    fpt4.setf(ios::scientific);
+    fpt4.setf(ios::scientific); fpt4.precision(16);
     fpt5.setf(ios::scientific);
 
     fpt1 << "# This file contains the data of initial population\n";
@@ -412,6 +416,7 @@ void NSGA2::realcross(const individual& parent1, const individual& parent2,
         nrealcross++;
 	for (i=0; i<nreal; i++) {
 	    //if (rgen.realu()<=0.5 ) { this is evil, in my opinion
+
 	    if (fabs(parent1.xreal[i]-parent2.xreal[i]) > EPS) {
 		
 		if (parent1.xreal[i] < parent2.xreal[i]) {
@@ -584,6 +589,7 @@ void NSGA2::advance() {
         i += 1;
     }
 
+    mixed_pop->crowding_distance(i);           // calculate crowding in Fi
     std::sort(mixed_pop->front[i].begin(),
               mixed_pop->front[i].end(),
               sort_n(*mixed_pop) );// sort remaining front using <n
